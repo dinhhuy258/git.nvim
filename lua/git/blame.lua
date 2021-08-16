@@ -32,6 +32,10 @@ local function create_blame_win()
   return win
 end
 
+function M.blame_commit()
+  vim.notify("TBD")
+end
+
 function M.blame()
   vim.cmd [[setlocal cursorbind]]
   local fpath = vim.fn.expand "%:p"
@@ -56,6 +60,16 @@ function M.blame()
   vim.api.nvim_win_set_cursor(blame_win, current_pos)
   vim.api.nvim_win_set_option(blame_win, "cursorbind", true)
   vim.api.nvim_win_set_option(starting_win, "scrollbind", true)
+
+  -- Keymaps
+  local options = {
+    noremap = true,
+    silent = true,
+    expr = false,
+  }
+
+  vim.api.nvim_buf_set_keymap(0, "n", "q", "<CMD>q<CR>", options)
+  vim.api.nvim_buf_set_keymap(0, "n", "<CR>", "<CMD>lua require('git.blame').blame_commit()<CR>", options)
 end
 
 return M
