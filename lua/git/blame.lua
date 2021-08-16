@@ -17,7 +17,16 @@ local function create_blame_win()
 end
 
 function M.blame()
+  local fpath = vim.fn.expand('%:p')
   create_blame_win()
+  vim.api.nvim_command('read!git --literal-pathspecs --no-pager -c blame.coloring=none -c blame.blankBoundary=false blame --show-number -- ' .. fpath)
+--   vim.fn.jobstart(cmd, {
+--     on_stderr = on_event,
+--     on_stdout = on_event,
+--     on_exit = on_event,
+--     stdout_buffered = true,
+--     stderr_buffered = true,
+--   })
 end
 
 return M
