@@ -1,5 +1,10 @@
 local M = {}
 
+local blame_state = {
+  file = "",
+  temp_file = "",
+}
+
 local function blameLinechars()
   local chars = vim.fn.strlen(
     vim.fn.substitute(vim.fn.matchstr(vim.fn.getline ".", [[.\{-\}\s\+\d\+\ze)]]), [[\v\C.]], ".", "g")
@@ -63,8 +68,49 @@ local function on_blame_done(lines)
   vim.api.nvim_buf_set_keymap(0, "n", "<CR>", "<CMD>lua require('git.blame').blame_commit()<CR>", options)
 end
 
+local function on_blame_commit_done(lines)
+  local temp_file = vim.fn.tempname()
+  vim.fn.writefile(lines, temp_file)
+
+  local win = vim.api.nvim_get_current_win()
+  vim.api.nvim_win_close(win, true)
+
+  vim.api.nvim_command("silent! e" .. temp_file)
+end
+
 function M.blame_commit()
-  vim.notify "TBD"
+  local line = vim.fn.getline "."
+  local commit = vim.fn.matchstr(line, [[^\^\=[?*]*\zs\x\+]])
+  local commit_hash = vim.fn.system("git --literal-pathspecs rev-parse --verify " .. commit .. " --")
+  local diff_cmd = "git --literal-pathspecs --no-pager show --no-color --pretty=format:%b "
+    .. commit_hash
+    .. " "
+    .. blame_state.file
+
+  local lines = {}
+  local function on_event(_, data, event)
+    if event == "stdout" or event == "stderr" then
+      if data then
+        for i = 1, #data do
+          if data[i] ~= "" then
+            table.insert(lines, data[i])
+          end
+        end
+      end
+    end
+
+    if event == "exit" then
+      on_blame_commit_done(lines)
+    end
+  end
+
+  vim.fn.jobstart(diff_cmd, {
+    on_stderr = on_event,
+    on_stdout = on_event,
+    on_exit = on_event,
+    stdout_buffered = true,
+    stderr_buffered = true,
+  })
 end
 
 function M.blame()
@@ -90,6 +136,7 @@ function M.blame()
     end
 
     if event == "exit" then
+      blame_state.file = fpath
       on_blame_done(lines)
     end
   end
