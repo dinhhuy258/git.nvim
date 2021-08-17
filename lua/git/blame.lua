@@ -3,6 +3,7 @@ local M = {}
 local blame_state = {
   file = "",
   temp_file = "",
+  starting_win = "",
 }
 
 local function blameLinechars()
@@ -43,6 +44,10 @@ end
 local function on_blame_done(lines)
   local starting_win = vim.api.nvim_get_current_win()
   local current_pos = vim.api.nvim_win_get_cursor(starting_win)
+  -- Save the state
+  blame_state.file = vim.fn.expand "%:p"
+  blame_state.starting_win = starting_win
+
   local blame_win, blame_buf = create_blame_win()
 
   vim.api.nvim_buf_set_lines(blame_buf, 0, -1, true, lines)
@@ -53,7 +58,6 @@ local function on_blame_done(lines)
   vim.api.nvim_win_set_option(blame_win, "cursorbind", true)
   vim.api.nvim_win_set_option(blame_win, "scrollbind", true)
 
-  -- TODO: Restore these options when blame windown is closed
   vim.api.nvim_win_set_option(starting_win, "scrollbind", true)
   vim.api.nvim_win_set_option(starting_win, "cursorbind", true)
 
@@ -66,16 +70,29 @@ local function on_blame_done(lines)
 
   vim.api.nvim_buf_set_keymap(0, "n", "q", "<CMD>q<CR>", options)
   vim.api.nvim_buf_set_keymap(0, "n", "<CR>", "<CMD>lua require('git.blame').blame_commit()<CR>", options)
+  vim.api.nvim_command "autocmd BufWinLeave <buffer> lua require('git.blame').blame_quit()"
 end
 
 local function on_blame_commit_done(lines)
   local temp_file = vim.fn.tempname()
+  blame_state.temp_file = temp_file
   vim.fn.writefile(lines, temp_file)
 
   local win = vim.api.nvim_get_current_win()
   vim.api.nvim_win_close(win, true)
 
   vim.api.nvim_command("silent! e" .. temp_file)
+
+  vim.api.nvim_command "autocmd BufLeave <buffer> lua require('git.blame').blame_commit_quit()"
+end
+
+function M.blame_commit_quit()
+  vim.fn.delete(blame_state.temp_file)
+end
+
+function M.blame_quit()
+  vim.api.nvim_win_set_option(blame_state.starting_win, "scrollbind", false)
+  vim.api.nvim_win_set_option(blame_state.starting_win, "cursorbind", false)
 end
 
 function M.blame_commit()
@@ -136,7 +153,6 @@ function M.blame()
     end
 
     if event == "exit" then
-      blame_state.file = fpath
       on_blame_done(lines)
     end
   end
