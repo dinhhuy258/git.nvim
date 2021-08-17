@@ -23,11 +23,16 @@ local function create_blame_win()
   vim.api.nvim_buf_set_option(buf, "bufhidden", "wipe")
   vim.api.nvim_buf_set_option(buf, "filetype", "git.nvim")
   vim.api.nvim_buf_set_option(buf, "buflisted", false)
-  vim.api.nvim_win_set_option(win, "wrap", false)
 
-  -- TODO: Rewrite in lua
-  vim.cmd [[setlocal nonumber scrollbind nowrap foldcolumn=0 nofoldenable winfixwidth]]
-  vim.cmd [[setlocal signcolumn=no]]
+  vim.api.nvim_win_set_option(win, "wrap", false)
+  vim.api.nvim_win_set_option(win, "cursorbind", true)
+  vim.api.nvim_win_set_option(win, "scrollbind", true)
+  vim.api.nvim_win_set_option(win, "number", false)
+  vim.api.nvim_win_set_option(win, "foldcolumn", "0")
+  vim.api.nvim_win_set_option(win, "foldenable", false)
+  vim.api.nvim_win_set_option(win, "foldenable", false)
+  vim.api.nvim_win_set_option(win, "winfixwidth", true)
+  vim.api.nvim_win_set_option(win, "signcolumn", "no")
 
   return win
 end
@@ -37,8 +42,11 @@ function M.blame_commit()
 end
 
 function M.blame()
-  vim.cmd [[setlocal cursorbind]]
   local fpath = vim.fn.expand "%:p"
+  if fpath == "" or fpath == nil then
+    return
+  end
+
   local starting_win = vim.api.nvim_get_current_win()
   local current_pos = vim.api.nvim_win_get_cursor(starting_win)
 
@@ -56,10 +64,10 @@ function M.blame()
   vim.cmd "normal gg"
   vim.cmd "normal dd"
 
-  -- TODO: Restore these options when blame windown is closed
   vim.api.nvim_win_set_cursor(blame_win, current_pos)
-  vim.api.nvim_win_set_option(blame_win, "cursorbind", true)
+  -- TODO: Restore these options when blame windown is closed
   vim.api.nvim_win_set_option(starting_win, "scrollbind", true)
+  vim.api.nvim_win_set_option(starting_win, "cursorbind", true)
 
   -- Keymaps
   local options = {
