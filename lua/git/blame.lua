@@ -25,8 +25,6 @@ local function create_blame_win()
   vim.api.nvim_buf_set_option(buf, "buflisted", false)
 
   vim.api.nvim_win_set_option(win, "wrap", false)
-  vim.api.nvim_win_set_option(win, "cursorbind", true)
-  vim.api.nvim_win_set_option(win, "scrollbind", true)
   vim.api.nvim_win_set_option(win, "number", false)
   vim.api.nvim_win_set_option(win, "foldcolumn", "0")
   vim.api.nvim_win_set_option(win, "foldenable", false)
@@ -46,6 +44,10 @@ local function on_blame_done(lines)
   vim.api.nvim_buf_set_option(blame_buf, "modifiable", false)
   vim.api.nvim_win_set_width(blame_win, blameLinechars() + 1)
   vim.api.nvim_win_set_cursor(blame_win, current_pos)
+  -- We should call cursorbind, scrollbind here to avoid unexpected behavior
+  vim.api.nvim_win_set_option(blame_win, "cursorbind", true)
+  vim.api.nvim_win_set_option(blame_win, "scrollbind", true)
+
   -- TODO: Restore these options when blame windown is closed
   vim.api.nvim_win_set_option(starting_win, "scrollbind", true)
   vim.api.nvim_win_set_option(starting_win, "cursorbind", true)
