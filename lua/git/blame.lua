@@ -73,7 +73,7 @@ local function on_blame_done(lines)
   vim.api.nvim_command "autocmd BufWinLeave <buffer> lua require('git.blame').blame_quit()"
 end
 
-local function on_blame_commit_done(lines)
+local function on_blame_commit_done(commit_hash, lines)
   local temp_file = vim.fn.tempname()
   blame_state.temp_file = temp_file
   vim.fn.writefile(lines, temp_file)
@@ -83,10 +83,14 @@ local function on_blame_commit_done(lines)
 
   vim.api.nvim_command("silent! e" .. temp_file)
 
+  local buf = vim.api.nvim_get_current_buf()
+  vim.api.nvim_buf_set_name(buf, commit_hash)
   vim.api.nvim_command "autocmd BufLeave <buffer> lua require('git.blame').blame_commit_quit()"
 end
 
 function M.blame_commit_quit()
+  local buf = vim.api.nvim_get_current_buf()
+  vim.api.nvim_command(buf .. "bdelete")
   vim.fn.delete(blame_state.temp_file)
 end
 
@@ -117,7 +121,7 @@ function M.blame_commit()
     end
 
     if event == "exit" then
-      on_blame_commit_done(lines)
+      on_blame_commit_done(commit_hash, lines)
     end
   end
 
