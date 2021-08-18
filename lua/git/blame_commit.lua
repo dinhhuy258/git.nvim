@@ -14,7 +14,7 @@ local function on_blame_commit_done(commit_hash, lines)
 
   local buf = vim.api.nvim_get_current_buf()
   vim.api.nvim_buf_set_name(buf, commit_hash)
-  vim.api.nvim_command "autocmd BufLeave <buffer> lua require('git.blame').blame_commit_quit()"
+  vim.api.nvim_command "autocmd BufLeave <buffer> lua require('git.blame_commit').blame_commit_quit()"
 end
 
 function M.blame_commit_quit()
@@ -26,8 +26,13 @@ end
 function M.blame_commit()
   local line = vim.fn.getline "."
   local commit = vim.fn.matchstr(line, [[^\^\=[?*]*\zs\x\+]])
+  if string.match(commit, "^0+$") then
+    vim.notify("Not Committed Yet")
+    return
+  end
+
   local commit_hash = vim.fn.system("git --literal-pathspecs rev-parse --verify " .. commit .. " --")
-  commit_hash = string.gsub(commit_hash, "n", "")
+  commit_hash = string.gsub(commit_hash, "\n", "")
   local diff_cmd = "git --literal-pathspecs --no-pager show --no-color --pretty=format:%b "
     .. commit_hash
     .. " "
