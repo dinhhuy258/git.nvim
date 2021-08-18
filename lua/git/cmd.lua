@@ -1,6 +1,13 @@
+local utils = require "git.utils"
+
 local M = {}
 
 function M.cmd(cmd)
+  if cmd == nil or cmd == "" then
+    utils.log "Please provide a command"
+    return
+  end
+
   local winnr = vim.fn.win_getid()
   local bufnr = vim.api.nvim_win_get_buf(winnr)
 
@@ -26,7 +33,7 @@ function M.cmd(cmd)
     end
   end
 
-  vim.fn.jobstart(cmd, {
+  vim.fn.jobstart("git " .. cmd, {
     on_stderr = on_event,
     on_stdout = on_event,
     on_exit = on_event,

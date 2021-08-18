@@ -1,6 +1,8 @@
 local M = {}
 
 function M.setup()
+  vim.cmd [[command! -nargs=* Git lua require("git.cmd").cmd(<f-args>)]]
+
   local options = {
     noremap = true,
     silent = true,

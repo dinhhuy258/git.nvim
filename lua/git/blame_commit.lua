@@ -1,3 +1,4 @@
+local utils = require "git.utils"
 local blame_state = require("git.state").blame_state
 
 local M = {}
@@ -27,7 +28,7 @@ function M.blame_commit()
   local line = vim.fn.getline "."
   local commit = vim.fn.matchstr(line, [[^\^\=[?*]*\zs\x\+]])
   if string.match(commit, "^0+$") then
-    vim.notify "[git] Not Committed Yet"
+    utils.log "Not Committed Yet"
     return
   end
 

@@ -1,5 +1,9 @@
 local M = {}
 
+function M.log(message)
+  vim.notify("[git] " .. message)
+end
+
 function M.get_git_repo()
   local fpath = vim.api.nvim_buf_get_name(0)
   if fpath == "" then
