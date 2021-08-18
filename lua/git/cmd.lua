@@ -2,43 +2,59 @@ local utils = require "git.utils"
 
 local M = {}
 
+local win, buf
+
+local function create_cmd_win()
+  vim.api.nvim_command "new"
+  win = vim.api.nvim_get_current_win()
+  buf = vim.api.nvim_get_current_buf()
+
+  vim.api.nvim_buf_set_option(buf, "buftype", "")
+  vim.api.nvim_buf_set_option(buf, "bufhidden", "hide")
+  vim.api.nvim_buf_set_option(buf, "swapfile", false)
+  vim.api.nvim_buf_set_option(buf, "buflisted", false)
+  vim.api.nvim_buf_set_option(buf, "modifiable", false)
+
+  vim.api.nvim_win_set_option(win, "wrap", false)
+  vim.api.nvim_win_set_option(win, "number", false)
+  vim.api.nvim_win_set_option(win, "list", false)
+
+  -- Keymaps
+  local options = {
+    noremap = true,
+    silent = true,
+    expr = false,
+  }
+  vim.api.nvim_buf_set_keymap(0, "n", "<CR>", "<CMD>lua require('git.cmd').close()<CR>", options)
+end
+
+function M.close()
+  if win then
+    if vim.api.nvim_win_is_valid(win) then
+      vim.api.nvim_win_close(win, true)
+    end
+  end
+  win = nil
+
+  if buf then
+    if vim.api.nvim_buf_is_valid(buf) then
+      vim.api.nvim_buf_delete(buf, { force = true })
+    end
+  end
+  buf = nil
+end
+
 function M.cmd(cmd)
   if cmd == nil or cmd == "" then
     utils.log "Please provide a command"
     return
   end
 
-  local winnr = vim.fn.win_getid()
-  local bufnr = vim.api.nvim_win_get_buf(winnr)
-
-  vim.cmd [[setl errorformat =%-G#\ %.%#]]
-  local lines = { "" }
-  local function on_event(_, data, event)
-    if event == "stdout" or event == "stderr" then
-      if data then
-        vim.list_extend(lines, data)
-      end
-    end
-
-    if event == "exit" then
-      vim.fn.setqflist({}, " ", {
-        title = "test",
-        lines = lines,
-        efm = vim.api.nvim_buf_get_option(bufnr, "errorformat"),
-      })
-      vim.api.nvim_command "doautocmd QuickFixCmdPost"
-    end
-    if #lines > 1 then
-      vim.cmd "copen"
-    end
-  end
-
-  vim.fn.jobstart("git " .. cmd, {
-    on_stderr = on_event,
-    on_stdout = on_event,
-    on_exit = on_event,
-    stdout_buffered = true,
-    stderr_buffered = true,
+  -- Close existing terminal first
+  M.close()
+  create_cmd_win()
+  vim.fn.termopen("git " .. cmd, {
+    ["cwd"] = vim.fn.getcwd(),
   })
 end
 
