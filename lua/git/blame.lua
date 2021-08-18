@@ -35,6 +35,46 @@ local function create_blame_win()
   return win, buf
 end
 
+local function blame_syntax()
+  local seen = {}
+  local hash_colors = {}
+  for lnum = 1, vim.fn.line "$" do
+    local orig_hash = vim.fn.matchstr(vim.fn.getline(lnum), [[^\^\=[*?]*\zs\x\{6\}]])
+    local hash = orig_hash
+    hash = vim.fn.substitute(hash, [[\(\x\)\x]], [[\=submatch(1).printf("%x", 15-str2nr(submatch(1),16))]], "g")
+    hash = vim.fn.substitute(hash, [[\(\x\x\)]], [[\=printf("%02x", str2nr(submatch(1),16)*3/4+32)]], "g")
+    if hash ~= "" and orig_hash ~= "000000" and seen[hash] == nil then
+      seen[hash] = 1
+      if vim.wo.t_Co == "256" then
+        local colors = vim.fn.map(vim.fn.matchlist(orig_hash, [[\(\x\)\x\(\x\)\x\(\x\)\x]]), "str2nr(v:val,16)")
+        local r = colors[2]
+        local g = colors[3]
+        local b = colors[4]
+        local color = 16 + (r + 1) / 3 * 36 + (g + 1) / 3 * 6 + (b + 1) / 3
+        if color == 16 then
+          color = 235
+        elseif color == 231 then
+          color = 255
+        end
+        hash_colors[hash] = " ctermfg=" .. tostring(color)
+      else
+        hash_colors[hash] = ""
+      end
+      local pattern = vim.fn.substitute(orig_hash, [[^\(\x\)\x\(\x\)\x\(\x\)\x$]], [[\1\\x\2\\x\3\\x]], "") .. [[*\>]]
+      vim.cmd [[syn match FugitiveblameUncommitted "\%(^\^\=[?*]*\)\@<=\<0\{7,\}\>" skipwhite]]
+      vim.cmd("syn match FugitiveblameHash" .. hash .. [[       "\%(^\^\=[*?]*\)\@<=]] .. pattern .. [[" skipwhite]])
+    end
+
+    for hash_value, cterm in pairs(hash_colors) do
+      if cterm ~= nil or vim.fn.has "gui_running" or vim.fn.hash "termguicolors" and vim.wo.termguicolors then
+        vim.cmd("hi FugitiveblameHash" .. hash_value .. " guifg=#" .. hash_value .. cterm)
+      else
+        vim.cmd("hi link FugitiveblameHash" .. hash_value .. " Identifier")
+      end
+    end
+  end
+end
+
 local function on_blame_done(lines)
   local starting_win = vim.api.nvim_get_current_win()
   local current_pos = vim.api.nvim_win_get_cursor(starting_win)
@@ -65,6 +105,8 @@ local function on_blame_done(lines)
   vim.api.nvim_buf_set_keymap(0, "n", "q", "<CMD>q<CR>", options)
   vim.api.nvim_buf_set_keymap(0, "n", "<CR>", "<CMD>lua require('git.blame_commit').blame_commit()<CR>", options)
   vim.api.nvim_command "autocmd BufWinLeave <buffer> lua require('git.blame').blame_quit()"
+
+  blame_syntax()
 end
 
 function M.blame_quit()
