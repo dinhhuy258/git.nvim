@@ -44,16 +44,22 @@ function M.close()
   buf = nil
 end
 
-function M.cmd(cmd)
-  if cmd == nil or cmd == "" then
+function M.cmd(...)
+  local args = { ... }
+  if #args == 0 then
     utils.log "Please provide a command"
     return
+  end
+
+  local cmd = "git"
+  for _, arg in pairs(args) do
+    cmd = cmd .. " " .. arg
   end
 
   -- Close existing terminal first
   M.close()
   create_cmd_win()
-  vim.fn.termopen("git " .. cmd, {
+  vim.fn.termopen(cmd, {
     ["cwd"] = vim.fn.getcwd(),
   })
 end
