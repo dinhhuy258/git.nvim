@@ -61,15 +61,14 @@ local function blame_syntax()
         hash_colors[hash] = ""
       end
       local pattern = vim.fn.substitute(orig_hash, [[^\(\x\)\x\(\x\)\x\(\x\)\x$]], [[\1\\x\2\\x\3\\x]], "") .. [[*\>]]
-      vim.cmd [[syn match FugitiveblameUncommitted "\%(^\^\=[?*]*\)\@<=\<0\{7,\}\>" skipwhite]]
-      vim.cmd("syn match FugitiveblameHash" .. hash .. [[       "\%(^\^\=[*?]*\)\@<=]] .. pattern .. [[" skipwhite]])
+      vim.cmd("syn match GitNvimBlameHash" .. hash .. [[       "\%(^\^\=[*?]*\)\@<=]] .. pattern .. [[" skipwhite]])
     end
 
     for hash_value, cterm in pairs(hash_colors) do
       if cterm ~= nil or vim.fn.has "gui_running" or vim.fn.hash "termguicolors" and vim.wo.termguicolors then
-        vim.cmd("hi FugitiveblameHash" .. hash_value .. " guifg=#" .. hash_value .. cterm)
+        vim.cmd("hi GitNvimBlameHash" .. hash_value .. " guifg=#" .. hash_value .. cterm)
       else
-        vim.cmd("hi link FugitiveblameHash" .. hash_value .. " Identifier")
+        vim.cmd("hi link GitNvimBlameHash" .. hash_value .. " Identifier")
       end
     end
   end
