@@ -131,6 +131,7 @@ function M.blame()
           if data[i] ~= "" then
             local commit = vim.fn.matchstr(data[i], [[^\^\=[?*]*\zs\x\+]])
             local commit_info = data[i]:match "%((.-)%)"
+            commit_info = string.match(commit_info, "(.-)%s(%S+)$")
             table.insert(lines, commit .. " " .. commit_info)
           end
         end
