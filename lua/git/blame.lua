@@ -3,9 +3,7 @@ local blame_state = require("git.state").blame_state
 local M = {}
 
 local function blameLinechars()
-  local chars = vim.fn.strlen(
-    vim.fn.substitute(vim.fn.matchstr(vim.fn.getline ".", [[.\{-\}\s\+\d\+\ze)]]), [[\v\C.]], ".", "g")
-  )
+  local chars = vim.fn.strlen(vim.fn.getline ".")
   if vim.fn.exists "*synconcealed" and vim.wo.conceallevel > 1 then
     for col = 1, chars do
       chars = chars - vim.fn.synconcealed(vim.fn.line ".", col)[0]
@@ -90,7 +88,9 @@ function M.blame()
       if data then
         for i = 1, #data do
           if data[i] ~= "" then
-            table.insert(lines, data[i])
+            local commit = vim.fn.matchstr(data[i], [[^\^\=[?*]*\zs\x\+]])
+            local commit_info = data[i]:match "%((.-)%)"
+            table.insert(lines, commit .. " " .. commit_info)
           end
         end
       end

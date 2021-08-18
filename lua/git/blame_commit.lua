@@ -27,7 +27,7 @@ function M.blame_commit()
   local line = vim.fn.getline "."
   local commit = vim.fn.matchstr(line, [[^\^\=[?*]*\zs\x\+]])
   if string.match(commit, "^0+$") then
-    vim.notify("Not Committed Yet")
+    vim.notify "Not Committed Yet"
     return
   end
 
