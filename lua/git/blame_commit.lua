@@ -35,8 +35,12 @@ function M.blame_commit()
   commit_hash = string.gsub(commit_hash, "\n", "")
   local diff_cmd = "git --literal-pathspecs --no-pager show --no-color --pretty=format:%b "
     .. commit_hash
+    .. " -C "
+    .. blame_state.git_root
     .. " "
     .. blame_state.file
+
+  vim.notify(diff_cmd)
 
   local lines = {}
   local function on_event(_, data, event)

@@ -3,6 +3,7 @@ local M = {
     file = "",
     temp_file = "",
     starting_win = "",
+    git_root = "",
   },
 }
 

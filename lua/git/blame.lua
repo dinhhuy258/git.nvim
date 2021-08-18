@@ -1,4 +1,5 @@
 local blame_state = require("git.state").blame_state
+local utils = require "git.utils"
 
 local M = {}
 
@@ -78,7 +79,7 @@ local function on_blame_done(lines)
   local starting_win = vim.api.nvim_get_current_win()
   local current_pos = vim.api.nvim_win_get_cursor(starting_win)
   -- Save the state
-  blame_state.file = vim.fn.expand "%:p"
+  blame_state.file = vim.api.nvim_buf_get_name(0)
   blame_state.starting_win = starting_win
 
   local blame_win, blame_buf = create_blame_win()
@@ -114,18 +115,27 @@ function M.blame_quit()
 end
 
 function M.blame()
-  local fpath = vim.fn.expand "%:p"
+  local fpath = vim.api.nvim_buf_get_name(0)
   if fpath == "" or fpath == nil then
     return
   end
 
-  local blame_cmd = "git --literal-pathspecs --no-pager -c blame.coloring=none -c blame.blankBoundary=false blame --show-number -- "
+  local git_root = utils.get_git_repo()
+  if git_root == "" then
+    return
+  end
+  blame_state.git_root = git_root
+
+  local blame_cmd = "git -C "
+    .. git_root
+    .. " --literal-pathspecs --no-pager -c blame.coloring=none -c blame.blankBoundary=false blame --show-number -- "
     .. fpath
 
   local lines = {}
 
   local function on_event(_, data, event)
     if event == "stdout" or event == "stderr" then
+      -- TODO: Handle error
       if data then
         for i = 1, #data do
           if data[i] ~= "" then
