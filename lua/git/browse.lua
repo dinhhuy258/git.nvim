@@ -17,10 +17,6 @@ local function open_url(url)
   end
 end
 
-local function is_git_file()
-  return vim.fn.expand "%:h" ~= ""
-end
-
 local function get_git_remote_url()
   local git_remote_url = utils.run_git_cmd 'git remote get-url origin | tr -d "\n"'
   if git_remote_url == nil then
@@ -82,26 +78,38 @@ local function get_git_site_type(git_remote_url)
   return nil
 end
 
-function M.open(visual_mode)
+local function get_git_repo_info()
   local git_remote_url = get_git_remote_url()
-  if git_remote_url == nil then
+  if git_remote_url == nil or git_remote_url == "" then
     utils.log "Failed to get git remote url"
-    return
-  end
-
-  local branch_name = get_current_branch_name()
-  if branch_name == nil then
-    utils.log "Failed to get branch name"
-    return
+    return nil, nil, nil
   end
 
   local git_site_type = get_git_site_type(git_remote_url)
-  if git_site_type == nil then
+  if git_site_type == nil or git_site_type == "" then
     utils.log "Git site is not supported"
+    return nil, nil, nil
+  end
+
+  local branch_name = get_current_branch_name()
+  if branch_name == nil or branch_name == "" then
+    utils.log "Failed to get current branch name"
+    return nil, nil, nil
+  end
+
+  return git_remote_url, git_site_type, branch_name
+end
+
+function M.open(visual_mode)
+  local git_remote_url, git_site_type, branch_name = get_git_repo_info()
+  if git_remote_url == nil or git_site_type == nil or branch_name == nil then
     return
   end
 
-  if is_git_file() then
+  utils.log "Opening git..."
+
+  if vim.fn.expand "%:h" ~= "" then
+    -- Git file
     local relative_path = vim.fn.expand "%"
     local git_url = git_remote_url .. "/blob/" .. branch_name .. "/" .. relative_path
 
@@ -127,25 +135,12 @@ function M.open(visual_mode)
 end
 
 function M.pull_request()
-  local git_remote_url = get_git_remote_url()
-  if git_remote_url == nil then
-    utils.log "Failed to get git remote url"
+  local git_remote_url, git_site_type, branch_name = get_git_repo_info()
+  if git_remote_url == nil or git_site_type == nil or branch_name == nil then
     return
   end
 
-  local branch_name = get_current_branch_name()
-  if branch_name == nil then
-    utils.log "Failed to get branch name"
-    return
-  end
-
-  local git_site_type = get_git_site_type(git_remote_url)
-  if git_site_type == nil then
-    utils.log "Git site is not supported"
-    return
-  end
-
-  utils.log "Opening pull request..."
+  utils.log "Opening a pull request..."
 
   local latest_commit_hash = get_lastest_commit_hash(branch_name)
   if latest_commit_hash == nil then
@@ -157,12 +152,41 @@ function M.pull_request()
   if git_site_type == GitType.GITHUB then
     url = get_github_pull_request_url(git_remote_url, latest_commit_hash)
   else
+    -- Gitlab
     url = get_gitlab_merge_request_url(git_remote_url, latest_commit_hash)
   end
 
   if url ~= nil then
     open_url(url)
   end
+end
+
+function M.create_pull_request(target_branch)
+  local git_remote_url, git_site_type, branch_name = get_git_repo_info()
+  if git_remote_url == nil or git_site_type == nil or branch_name == nil then
+    return
+  end
+
+  utils.log "Creating a pull request..."
+
+  local git_target_branch = "master" -- Move to config
+  if target_branch ~= nil and target_branch ~= "" then
+    git_target_branch = target_branch
+  end
+
+  local url = nil
+  if git_site_type == GitType.GITHUB then
+    url = git_remote_url .. "/compare/" .. git_target_branch .. "..." .. branch_name
+  else
+    -- Gitlab
+    url = git_remote_url
+      .. "/merge_requests/new?utf8=%E2%9C%93&merge_request[source_branch]="
+      .. branch_name
+      .. "&merge_request[target_branch]="
+      .. git_target_branch
+  end
+
+  open_url(url)
 end
 
 return M
