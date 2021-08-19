@@ -1,7 +1,13 @@
-local blame_state = require("git.state").blame_state
 local utils = require "git.utils"
 
 local M = {}
+
+local blame_state = {
+  file = "",
+  temp_file = "",
+  starting_win = "",
+  git_root = "",
+}
 
 local function blameLinechars()
   local chars = vim.fn.strlen(vim.fn.getline ".")
