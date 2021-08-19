@@ -32,7 +32,12 @@ function M.blame_commit()
     return
   end
 
-  local commit_hash = vim.fn.system("git --literal-pathspecs rev-parse --verify " .. commit .. " --")
+  local commit_hash = utils.run_git_cmd("git --literal-pathspecs rev-parse --verify " .. commit .. " --")
+  if commit_hash == nil then
+    utils.log "Commit hash not found"
+    return
+  end
+
   commit_hash = string.gsub(commit_hash, "\n", "")
   local diff_cmd = "git --literal-pathspecs --no-pager show --no-color --pretty=format:%b "
     .. commit_hash

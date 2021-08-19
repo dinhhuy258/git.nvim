@@ -10,6 +10,8 @@ function M.setup()
   }
 
   vim.api.nvim_set_keymap("n", "<Leader>gb", "<CMD>lua require('git.blame').blame()<CR>", options)
+  vim.api.nvim_set_keymap("n", "<Leader>go", "<CMD>lua require('git.browse').open(false)<CR>", options)
+  vim.api.nvim_set_keymap("x", "<Leader>go", ":<C-u> lua require('git.browse').open(true)<CR>", options)
 end
 
 return M
