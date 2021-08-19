@@ -14,6 +14,8 @@ function M.setup()
   vim.api.nvim_set_keymap("x", "<Leader>go", ":<C-u> lua require('git.browse').open(true)<CR>", options)
   vim.api.nvim_set_keymap("n", "<Leader>gp", "<CMD>lua require('git.browse').pull_request()<CR>", options)
   vim.api.nvim_set_keymap("n", "<Leader>gn", "<CMD>lua require('git.browse').create_pull_request()<CR>", options)
+
+  vim.cmd [[command! -nargs=* GitCreatePullRequest lua require('git.browse').create_pull_request(<f-args>)]]
 end
 
 return M
