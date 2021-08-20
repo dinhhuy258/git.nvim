@@ -1,12 +1,21 @@
 local M = {}
 
-function string.starts(string, start)
+local function starts(string, start)
   return string.sub(string, 1, string.len(start)) == start
+end
+
+function M.split(s, delimiter)
+  local result = {}
+  for match in (s .. delimiter):gmatch("(.-)" .. delimiter) do
+    table.insert(result, match)
+  end
+
+  return result
 end
 
 function M.run_git_cmd(cmd)
   local cmd_result = vim.fn.system(cmd)
-  if cmd_result == nil or string.starts(cmd_result, "fatal:") then
+  if cmd_result == nil or starts(cmd_result, "fatal:") then
     return nil
   end
 

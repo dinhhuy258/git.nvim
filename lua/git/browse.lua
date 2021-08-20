@@ -39,8 +39,7 @@ local function get_gitlab_merge_request_url(git_remote_url, commit_hash)
     return
   end
 
-  -- TODO: Handle in lua
-  local merge_request_id = vim.fn.system("echo " .. merge_request .. [[ | awk -F'/' '{print $3}' | tr -d "\n"]])
+  local merge_request_id = utils.split(merge_request, "/")[3]
 
   return git_remote_url .. "/merge_requests/" .. merge_request_id
 end
@@ -54,8 +53,7 @@ local function get_github_pull_request_url(git_remote_url, commit_hash)
     return
   end
 
-  -- TODO: Handle in lua
-  local pull_request_id = vim.fn.system("echo " .. pull_request .. [[ | awk -F'/' '{print $3}' | tr -d "\n"]])
+  local pull_request_id = utils.split(pull_request, "/")[3]
 
   return git_remote_url .. "/pull/" .. pull_request_id
 end
