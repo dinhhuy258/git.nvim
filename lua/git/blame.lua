@@ -1,3 +1,4 @@
+local config = require("git.config").config
 local utils = require "git.utils"
 
 local M = {}
@@ -108,8 +109,14 @@ local function on_blame_done(lines)
     expr = false,
   }
 
-  vim.api.nvim_buf_set_keymap(0, "n", "q", "<CMD>q<CR>", options)
-  vim.api.nvim_buf_set_keymap(0, "n", "<CR>", "<CMD>lua require('git.blame').blame_commit()<CR>", options)
+  vim.api.nvim_buf_set_keymap(0, "n", config.keymaps.quit_blame, "<CMD>q<CR>", options)
+  vim.api.nvim_buf_set_keymap(
+    0,
+    "n",
+    config.keymaps.blame_commit,
+    "<CMD>lua require('git.blame').blame_commit()<CR>",
+    options
+  )
   vim.api.nvim_command "autocmd BufWinLeave <buffer> lua require('git.blame').blame_quit()"
 
   blame_syntax()

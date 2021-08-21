@@ -1,3 +1,4 @@
+local config = require("git.config").config
 local utils = require "git.utils"
 
 local M = {}
@@ -167,7 +168,7 @@ function M.create_pull_request(target_branch)
 
   utils.log "Creating a pull request..."
 
-  local git_target_branch = "master" -- Move to config
+  local git_target_branch = config.target_branch
   if target_branch ~= nil and target_branch ~= "" then
     git_target_branch = target_branch
   end
