@@ -65,10 +65,13 @@ require('git').setup({
 
 ## Command
 
-- `:Git` run git command in terminal
+`:Git` run git command in terminal
 
-Eg: `:Git checkout -b test`
+Eg: 
+`:Git checkout -b test`
 
-- `:GitCreatePullRequest` create pull request in git repository, the default target branch is set in the `target_branch` option. If you provide the branch then the default `target_branch` will be ignored
+`:GitCreatePullRequest` create pull request in git repository, the default target branch is set in the `target_branch` option. If you provide the branch then the default `target_branch` will be ignored
 
-Eg: `:GitCreatePullRequest`, `:GitCreatePullRequest test_branch`
+Eg: 
+`:GitCreatePullRequest`
+`:GitCreatePullRequest test_branch`
