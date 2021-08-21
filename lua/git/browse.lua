@@ -121,7 +121,7 @@ function M.open(visual_mode)
 
   if vim.fn.expand "%:h" ~= "" then
     -- Git file
-    local relative_path = vim.fn.expand "%"
+    local relative_path = vim.fn.fnamemodify(vim.fn.expand("%"), ":~:.")
     local git_url = git_remote_url .. "/blob/" .. branch_name .. "/" .. relative_path
 
     if visual_mode then
