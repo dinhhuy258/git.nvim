@@ -75,3 +75,7 @@ Eg:
 Eg: 
 `:GitCreatePullRequest`
 `:GitCreatePullRequest test_branch`
+
+## Issues
+
+- Not sure the plugin will work on window so pull request are welcome
