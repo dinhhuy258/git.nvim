@@ -1,7 +1,11 @@
 local M = {}
 
-local function starts(string, start)
-  return string.sub(string, 1, string.len(start)) == start
+function M.starts_with(str, start)
+  return str:sub(1, #start) == start
+end
+
+function M.end_with(str, ending)
+  return ending == "" or str:sub(-#ending) == ending
 end
 
 function M.split(s, delimiter)
@@ -15,7 +19,7 @@ end
 
 function M.run_git_cmd(cmd)
   local cmd_result = vim.fn.system(cmd)
-  if cmd_result == nil or starts(cmd_result, "fatal:") then
+  if cmd_result == nil or M.starts_with(cmd_result, "fatal:") then
     return nil
   end
 

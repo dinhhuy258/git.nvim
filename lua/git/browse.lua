@@ -24,11 +24,23 @@ local function get_git_remote_url()
     return
   end
 
-  return vim.fn.system(
-    "echo "
-      .. git_remote_url
-      .. [[ | sed -Ee 's#(git@|git://)#https://#' -e 's@com:@com/@' -e 's%\.git$%%' | tr -d "\n"]]
-  )
+  if utils.starts_with(git_remote_url, "git@") then
+    git_remote_url = git_remote_url:sub(#"git@" + 1)
+    git_remote_url = "https://" .. git_remote_url
+  end
+
+  if utils.starts_with(git_remote_url, "git://") then
+    git_remote_url = git_remote_url:sub(#"git://" + 1)
+    git_remote_url = "https://" .. git_remote_url
+  end
+
+  git_remote_url = git_remote_url:gsub("com:", "com/")
+
+  if utils.end_with(git_remote_url, ".git") then
+    git_remote_url = git_remote_url:sub(1, -(#".git" + 1))
+  end
+
+  return git_remote_url
 end
 
 local function get_gitlab_merge_request_url(git_remote_url, commit_hash)
