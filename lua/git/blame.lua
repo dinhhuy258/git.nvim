@@ -83,9 +83,8 @@ end
 
 local function on_blame_done(lines)
   local starting_win = vim.api.nvim_get_current_win()
-  local current_pos = vim.api.nvim_win_get_cursor(starting_win)
-  vim.api.nvim_win_set_cursor(starting_win, { 1, current_pos[2] })
-  vim.api.nvim_win_set_cursor(starting_win, current_pos)
+  local current_top = vim.fn.line("w0") + vim.wo.scrolloff
+  local current_pos = vim.fn.line(".")
 
   -- Save the state
   blame_state.file = vim.api.nvim_buf_get_name(0)
@@ -96,7 +95,11 @@ local function on_blame_done(lines)
   vim.api.nvim_buf_set_lines(blame_buf, 0, -1, true, lines)
   vim.api.nvim_buf_set_option(blame_buf, "modifiable", false)
   vim.api.nvim_win_set_width(blame_win, blameLinechars() + 1)
-  vim.api.nvim_win_set_cursor(blame_win, current_pos)
+
+  vim.cmd("execute " .. tostring(current_top))
+  vim.cmd("normal! zt")
+  vim.cmd("execute " .. tostring(current_pos))
+
   -- We should call cursorbind, scrollbind here to avoid unexpected behavior
   vim.api.nvim_win_set_option(blame_win, "cursorbind", true)
   vim.api.nvim_win_set_option(blame_win, "scrollbind", true)
