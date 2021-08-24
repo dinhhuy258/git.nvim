@@ -1,6 +1,6 @@
 # git.nvim
 
-git.nvim is the clone of the plugin [vim-fugitive](https://github.com/tpope/vim-fugitive) which is written in Lua.
+git.nvim is the simple clone of the plugin [vim-fugitive](https://github.com/tpope/vim-fugitive) which is written in Lua.
 
 ## Install
 
@@ -78,4 +78,8 @@ Eg:
 
 ## Issues
 
-- Not sure the plugin will work on window so pull request are welcome
+- Some features may not work on window so pull request are welcome
+
+## Credits
+
+- [vim-fugitive](https://github.com/tpope/vim-fugitive)
