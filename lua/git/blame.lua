@@ -32,7 +32,6 @@ local function create_blame_win()
   vim.api.nvim_buf_set_option(buf, "filetype", "git.nvim")
   vim.api.nvim_buf_set_option(buf, "buflisted", false)
 
-  vim.api.nvim_win_set_option(win, "wrap", false)
   vim.api.nvim_win_set_option(win, "number", false)
   vim.api.nvim_win_set_option(win, "foldcolumn", "0")
   vim.api.nvim_win_set_option(win, "foldenable", false)
@@ -85,6 +84,9 @@ end
 local function on_blame_done(lines)
   local starting_win = vim.api.nvim_get_current_win()
   local current_pos = vim.api.nvim_win_get_cursor(starting_win)
+  vim.api.nvim_win_set_cursor(starting_win, { 1, current_pos[2] })
+  vim.api.nvim_win_set_cursor(starting_win, current_pos)
+
   -- Save the state
   blame_state.file = vim.api.nvim_buf_get_name(0)
   blame_state.starting_win = starting_win
