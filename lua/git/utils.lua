@@ -31,7 +31,14 @@ function M.log(message)
 end
 
 function M.get_git_repo()
-  return M.run_git_cmd('git rev-parse --git-dir')
+  local dir = vim.fn.trim(M.run_git_cmd('git rev-parse --show-toplevel'))
+  local file = vim.fn.expand('%')
+
+  if file == "" or file == "." or dir == "" then
+    return ""
+  else
+    return dir
+  end
 end
 
 return M
