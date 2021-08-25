@@ -31,12 +31,7 @@ function M.log(message)
 end
 
 function M.get_git_repo()
-  local fpath = vim.api.nvim_buf_get_name(0)
-  if fpath == "" then
-    return ""
-  end
-
-  return vim.fn.finddir(".git/..", fpath .. ";")
+  return M.run_git_cmd('git rev-parse --git-dir')
 end
 
 return M
