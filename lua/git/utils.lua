@@ -31,12 +31,14 @@ function M.log(message)
 end
 
 function M.get_git_repo()
-  local fpath = vim.api.nvim_buf_get_name(0)
-  if fpath == "" then
-    return ""
-  end
+  local dir = vim.fn.trim(M.run_git_cmd('git rev-parse --show-toplevel'))
+  local file = vim.fn.expand('%')
 
-  return vim.fn.finddir(".git/..", fpath .. ";")
+  if file == "" or file == "." or dir == "" then
+    return ""
+  else
+    return dir
+  end
 end
 
 return M
