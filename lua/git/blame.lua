@@ -7,6 +7,7 @@ local blame_state = {
   file = "",
   temp_file = "",
   starting_win = "",
+  relative_path = "",
   git_root = "",
 }
 
@@ -83,8 +84,8 @@ end
 
 local function on_blame_done(lines)
   local starting_win = vim.api.nvim_get_current_win()
-  local current_top = vim.fn.line("w0") + vim.wo.scrolloff
-  local current_pos = vim.fn.line(".")
+  local current_top = vim.fn.line "w0" + vim.wo.scrolloff
+  local current_pos = vim.fn.line "."
 
   -- Save the state
   blame_state.file = vim.api.nvim_buf_get_name(0)
@@ -97,7 +98,7 @@ local function on_blame_done(lines)
   vim.api.nvim_win_set_width(blame_win, blameLinechars() + 1)
 
   vim.cmd("execute " .. tostring(current_top))
-  vim.cmd("normal! zt")
+  vim.cmd "normal! zt"
   vim.cmd("execute " .. tostring(current_pos))
 
   -- We should call cursorbind, scrollbind here to avoid unexpected behavior
@@ -140,6 +141,8 @@ local function on_blame_commit_done(commit_hash, lines)
   local buf = vim.api.nvim_get_current_buf()
   vim.api.nvim_buf_set_name(buf, commit_hash)
   vim.api.nvim_command "autocmd BufLeave <buffer> lua require('git.blame').blame_commit_quit()"
+
+  vim.fn.search([[^diff .* b/\M]] .. vim.fn.escape(blame_state.relative_path, "\\") .. "$", "W")
 end
 
 function M.blame_commit_quit()
@@ -214,6 +217,7 @@ function M.blame()
     return
   end
   blame_state.git_root = git_root
+  blame_state.relative_path = vim.fn.fnamemodify(vim.fn.expand "%", ":~:.")
 
   local blame_cmd = "git -C "
     .. git_root
