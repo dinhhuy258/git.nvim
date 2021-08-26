@@ -133,6 +133,7 @@ local function on_blame_commit_done(commit_hash, lines)
   blame_state.temp_file = temp_file
   vim.fn.writefile(lines, temp_file)
 
+  -- Close blame window
   local win = vim.api.nvim_get_current_win()
   vim.api.nvim_win_close(win, true)
 
