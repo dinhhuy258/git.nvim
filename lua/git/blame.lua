@@ -129,6 +129,11 @@ local function on_blame_done(lines)
 end
 
 local function on_blame_commit_done(commit_hash, lines)
+  -- TODO: Find a better way to handle this case
+  while #lines ~= 0 and not utils.starts_with(lines[1], "diff") do
+    table.remove(lines, 1)
+  end
+
   local temp_file = vim.fn.tempname()
   blame_state.temp_file = temp_file
   vim.fn.writefile(lines, temp_file)
