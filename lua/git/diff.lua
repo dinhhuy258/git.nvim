@@ -3,9 +3,16 @@ local utils = require "git.utils"
 local M = {}
 
 local function on_get_file_content_done(lines)
+  local buf_name = vim.fn.fnamemodify(vim.fn.expand "%", ":~:.")
+
   local temp_file = vim.fn.tempname()
   vim.fn.writefile(lines, temp_file)
   vim.api.nvim_command("leftabove keepalt vertical diffsplit" .. temp_file)
+
+  local buf = vim.api.nvim_get_current_buf()
+  vim.api.nvim_buf_set_name(buf, "~/" .. buf_name)
+  vim.api.nvim_buf_set_option(buf, "buftype", "nofile")
+  vim.api.nvim_buf_set_option(buf, "bufhidden", "delete")
 end
 
 function M.diff()
