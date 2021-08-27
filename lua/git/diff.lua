@@ -2,10 +2,15 @@ local utils = require "git.utils"
 
 local M = {}
 
+local diff_state = {
+  temp_file = nil,
+}
+
 local function on_get_file_content_done(lines)
   local buf_name = vim.fn.fnamemodify(vim.fn.expand "%", ":~:.")
 
   local temp_file = vim.fn.tempname()
+  diff_state.temp_file = temp_file
   vim.fn.writefile(lines, temp_file)
   vim.api.nvim_command("leftabove keepalt vertical diffsplit" .. temp_file)
 
@@ -13,6 +18,12 @@ local function on_get_file_content_done(lines)
   vim.api.nvim_buf_set_name(buf, "~/" .. buf_name)
   vim.api.nvim_buf_set_option(buf, "buftype", "nofile")
   vim.api.nvim_buf_set_option(buf, "bufhidden", "delete")
+  vim.api.nvim_buf_set_option(buf, "modifiable", false)
+  vim.api.nvim_command "autocmd BufDelete <buffer> lua require('git.diff').diff_quit()"
+end
+
+function M.diff_quit()
+  vim.fn.delete(diff_state.temp_file)
 end
 
 function M.diff()
