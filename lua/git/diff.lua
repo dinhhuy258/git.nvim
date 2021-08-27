@@ -47,12 +47,13 @@ function M.diff()
   local function on_event(_, data, event)
     if event == "stdout" or event == "stderr" then
       -- TODO: Handle error
-      if event == "stdout" or event == "stderr" then
-        if data then
-          for i = 1, #data do
-            table.insert(lines, data[i])
-          end
-        end
+      data = utils.handle_job_data(data)
+      if not data then
+        return
+      end
+
+      for i = 1, #data do
+        table.insert(lines, data[i])
       end
     end
 

@@ -186,11 +186,14 @@ function M.blame_commit()
   local function on_event(_, data, event)
     -- TODO: Handle error data
     if event == "stdout" or event == "stderr" then
-      if data then
-        for i = 1, #data do
-          if data[i] ~= "" then
-            table.insert(lines, data[i])
-          end
+      data = utils.handle_job_data(data)
+      if not data then
+        return
+      end
+
+      for i = 1, #data do
+        if data[i] ~= "" then
+          table.insert(lines, data[i])
         end
       end
     end
@@ -237,14 +240,17 @@ function M.blame()
   local function on_event(_, data, event)
     if event == "stdout" or event == "stderr" then
       -- TODO: Handle error
-      if data then
-        for i = 1, #data do
-          if data[i] ~= "" then
-            local commit = vim.fn.matchstr(data[i], [[^\^\=[?*]*\zs\x\+]])
-            local commit_info = data[i]:match "%((.-)%)"
-            commit_info = string.match(commit_info, "(.-)%s(%S+)$")
-            table.insert(lines, commit .. " " .. commit_info)
-          end
+      data = utils.handle_job_data(data)
+      if not data then
+        return
+      end
+
+      for i = 1, #data do
+        if data[i] ~= "" then
+          local commit = vim.fn.matchstr(data[i], [[^\^\=[?*]*\zs\x\+]])
+          local commit_info = data[i]:match "%((.-)%)"
+          commit_info = string.match(commit_info, "(.-)%s(%S+)$")
+          table.insert(lines, commit .. " " .. commit_info)
         end
       end
     end
