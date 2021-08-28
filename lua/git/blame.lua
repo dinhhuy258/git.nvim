@@ -32,6 +32,7 @@ local function create_blame_win()
   vim.api.nvim_win_set_option(win, "foldenable", false)
   vim.api.nvim_win_set_option(win, "winfixwidth", true)
   vim.api.nvim_win_set_option(win, "signcolumn", "no")
+  vim.api.nvim_win_set_option(win, "wrap", false)
 
   return win, buf
 end
