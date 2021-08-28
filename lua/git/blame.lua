@@ -12,14 +12,7 @@ local blame_state = {
 }
 
 local function blameLinechars()
-  local chars = vim.fn.strlen(vim.fn.getline ".")
-  if vim.fn.exists "*synconcealed" and vim.wo.conceallevel > 1 then
-    for col = 1, chars do
-      chars = chars - vim.fn.synconcealed(vim.fn.line ".", col)[0]
-    end
-  end
-
-  return chars
+  return vim.fn.strlen(vim.fn.getline ".")
 end
 
 local function create_blame_win()
