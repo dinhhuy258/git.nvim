@@ -24,6 +24,7 @@ function M.setup(cfg)
     "<CMD>lua require('git.browse').create_pull_request()<CR>",
     options
   )
+  vim.api.nvim_set_keymap("n", cfg.keymaps.diff, "<CMD>lua require('git.diff').diff()<CR>", options)
 
   vim.cmd [[command! -nargs=* GitCreatePullRequest lua require('git.browse').create_pull_request(<f-args>)]]
   vim.cmd [[command! -nargs=* GitDiff lua require("git.diff").diff(<f-args>)]]

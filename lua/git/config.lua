@@ -10,6 +10,7 @@ local default_cfg = {
     browse = "<Leader>go",
     open_pull_request = "<Leader>gp",
     create_pull_request = "<Leader>gn",
+    diff = "<Leader>gd",
   },
   target_branch = "master",
 }
