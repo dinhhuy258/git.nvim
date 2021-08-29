@@ -26,7 +26,7 @@ function M.diff_quit()
   vim.fn.delete(diff_state.temp_file)
 end
 
-function M.diff()
+function M.diff(base)
   local fpath = vim.api.nvim_buf_get_name(0)
   if fpath == "" or fpath == nil then
     return
@@ -37,9 +37,13 @@ function M.diff()
     return
   end
 
+  if base == nil or base == "" then
+    base = "HEAD"
+  end
+
   local file_content_cmd = "git -C "
     .. git_root
-    .. " --literal-pathspecs --no-pager show HEAD:"
+    .. string.format(" --literal-pathspecs --no-pager show %s:", base)
     .. vim.fn.fnamemodify(vim.fn.expand "%", ":~:.")
 
   local lines = {}
@@ -62,7 +66,6 @@ function M.diff()
     end
   end
 
-  vim.notify(file_content_cmd)
   vim.fn.jobstart(file_content_cmd, {
     on_stderr = on_event,
     on_stdout = on_event,

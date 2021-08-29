@@ -26,7 +26,7 @@ function M.setup(cfg)
   )
 
   vim.cmd [[command! -nargs=* GitCreatePullRequest lua require('git.browse').create_pull_request(<f-args>)]]
-  vim.cmd [[command! GitDiff lua require("git.diff").diff()]]
+  vim.cmd [[command! -nargs=* GitDiff lua require("git.diff").diff(<f-args>)]]
   vim.cmd [[command! -nargs=* Git lua require("git.cmd").cmd(<f-args>)]]
 end
 
