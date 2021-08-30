@@ -3,6 +3,7 @@ local utils = require "git.utils"
 local M = {}
 
 local diff_state = {
+  base_bufnr = nil,
   temp_file = nil,
 }
 
@@ -19,14 +20,28 @@ local function on_get_file_content_done(lines)
   vim.api.nvim_buf_set_option(buf, "buftype", "nofile")
   vim.api.nvim_buf_set_option(buf, "bufhidden", "delete")
   vim.api.nvim_buf_set_option(buf, "modifiable", false)
-  vim.api.nvim_command "autocmd BufDelete <buffer> lua require('git.diff').diff_quit()"
+  vim.api.nvim_command "autocmd BufDelete <buffer> lua require('git.diff').on_diff_quit()"
 end
 
-function M.diff_quit()
+function M.on_diff_quit()
   vim.fn.delete(diff_state.temp_file)
 end
 
-function M.diff(base)
+function M.close()
+  if not vim.wo.diff then
+    return
+  end
+
+  vim.api.nvim_command "diffoff"
+  vim.api.nvim_command("buffer " .. diff_state.base_bufnr)
+  vim.api.nvim_command "on"
+end
+
+function M.open(base)
+  if vim.wo.diff then
+    return
+  end
+
   local fpath = vim.api.nvim_buf_get_name(0)
   if fpath == "" or fpath == nil then
     return
@@ -65,6 +80,8 @@ function M.diff(base)
       on_get_file_content_done(lines)
     end
   end
+
+  diff_state.base_bufnr = vim.api.nvim_get_current_buf()
 
   vim.fn.jobstart(file_content_cmd, {
     on_stderr = on_event,

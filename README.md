@@ -59,6 +59,8 @@ require('git').setup({
     create_pull_request = "<Leader>gn",
     -- Opens a new diff that compares against the current index
     diff = "<Leader>gd",
+    -- Close git diff
+    diff_close = "<Leader>gD",
   },
   -- Default target branch when create a pull request
   target_branch = "master",

@@ -24,10 +24,12 @@ function M.setup(cfg)
     "<CMD>lua require('git.browse').create_pull_request()<CR>",
     options
   )
-  vim.api.nvim_set_keymap("n", cfg.keymaps.diff, "<CMD>lua require('git.diff').diff()<CR>", options)
+  vim.api.nvim_set_keymap("n", cfg.keymaps.diff, "<CMD>lua require('git.diff').open()<CR>", options)
+  vim.api.nvim_set_keymap("n", cfg.keymaps.diff_close, "<CMD>lua require('git.diff').close()<CR>", options)
 
   vim.cmd [[command! -nargs=* GitCreatePullRequest lua require('git.browse').create_pull_request(<f-args>)]]
-  vim.cmd [[command! -nargs=* GitDiff lua require("git.diff").diff(<f-args>)]]
+  vim.cmd [[command! -nargs=* GitDiff lua require("git.diff").open(<f-args>)]]
+  vim.cmd [[command! GitDiffClose lua require("git.diff").close()]]
   vim.cmd [[command! -nargs=* Git lua require("git.cmd").cmd(<f-args>)]]
 end
 

@@ -11,6 +11,7 @@ local default_cfg = {
     open_pull_request = "<Leader>gp",
     create_pull_request = "<Leader>gn",
     diff = "<Leader>gd",
+    diff_close = "<Leader>gD",
   },
   target_branch = "master",
 }
