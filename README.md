@@ -77,6 +77,8 @@ Eg:
 
 `:GitDiff` opens a new diff that compares against the current index. You can also provide any valid git rev to the command. Eg: `:GitDiff HEAD~2`
 
+`:GitDiffClose` close the git diff window
+
 `:GitCreatePullRequest` create pull request in git repository, the default target branch is set in the `target_branch` option. If you provide the branch then the default `target_branch` will be ignored
 
 Eg: 
