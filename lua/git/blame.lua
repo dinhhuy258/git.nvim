@@ -230,10 +230,10 @@ function M.blame()
     .. fpath
 
   local lines = {}
+  local has_error = false
 
   local function on_event(_, data, event)
-    if event == "stdout" or event == "stderr" then
-      -- TODO: Handle error
+    if event == "stdout" then
       data = utils.handle_job_data(data)
       if not data then
         return
@@ -247,10 +247,22 @@ function M.blame()
           table.insert(lines, commit .. " " .. commit_info)
         end
       end
-    end
+    elseif event == "stderr" then
+      data = utils.handle_job_data(data)
+      if not data then
+        return
+      end
 
-    if event == "exit" then
-      on_blame_done(lines)
+      has_error = true
+      local error_message = ""
+      for _, line in ipairs(data) do
+        error_message = error_message .. line
+      end
+      utils.log("Failed to open git blame window: " .. error_message)
+    elseif event == "exit" then
+      if not has_error then
+        on_blame_done(lines)
+      end
     end
   end
 
