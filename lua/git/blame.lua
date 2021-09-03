@@ -161,7 +161,9 @@ function M.blame_commit()
     return
   end
 
-  local commit_hash = utils.run_git_cmd("git --literal-pathspecs rev-parse --verify " .. commit .. " --")
+  local commit_hash = utils.run_git_cmd(
+    "git -C " .. blame_state.git_root .. " --literal-pathspecs rev-parse --verify " .. commit .. " --"
+  )
   if commit_hash == nil then
     utils.log "Commit hash not found"
     return
