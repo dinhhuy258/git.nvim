@@ -32,8 +32,8 @@ end
 
 function M.get_git_repo()
   local gsd = vim.b.gitsigns_status_dict
-  if gsd and gsd.gitdir and #gsd.gitdir > 0 then
-    return gsd.gitdir
+  if gsd and gsd.root and #gsd.root > 0 then
+    return gsd.root
   end
 
   local dir = vim.fn.trim(M.run_git_cmd('git rev-parse --show-toplevel'))
