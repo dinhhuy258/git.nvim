@@ -19,7 +19,8 @@ local function open_url(url)
 end
 
 local function get_git_remote_url()
-  local git_remote_url = utils.run_git_cmd 'git remote get-url origin | tr -d "\n"'
+  local git_root = utils.get_git_repo()
+  local git_remote_url = utils.run_git_cmd("git -C " .. git_root .. ' remote get-url origin | tr -d "\n"')
   if git_remote_url == nil then
     return
   end
@@ -72,7 +73,7 @@ local function get_github_pull_request_url(git_remote_url, commit_hash)
 end
 
 local function get_current_branch_name()
-  return utils.run_git_cmd 'git rev-parse --abbrev-ref HEAD | tr -d "\n"'
+  return utils.get_current_branch_name()
 end
 
 local function get_lastest_commit_hash(branch_name)
@@ -121,7 +122,13 @@ function M.open(visual_mode)
 
   if vim.fn.expand "%:h" ~= "" then
     -- Git file
-    local relative_path = vim.fn.fnamemodify(vim.fn.expand("%"), ":~:.")
+    local git_root = utils.get_git_repo()
+    local absolute_path = vim.fn.expand "%:p"
+    local relative_path = vim.fn.fnamemodify(vim.fn.expand "%", ":~:.")
+    if utils.starts_with(absolute_path, git_root) then
+      relative_path = absolute_path:sub(#git_root + 1)
+    end
+
     local git_url = git_remote_url .. "/blob/" .. branch_name .. "/" .. relative_path
 
     if visual_mode then

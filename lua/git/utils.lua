@@ -31,19 +31,30 @@ function M.log(message)
 end
 
 function M.get_git_repo()
+  --TODO: Remove gitsigns dependency
   local gsd = vim.b.gitsigns_status_dict
   if gsd and gsd.root and #gsd.root > 0 then
     return gsd.root
   end
 
-  local dir = vim.fn.trim(M.run_git_cmd('git rev-parse --show-toplevel'))
-  local file = vim.fn.expand('%')
+  local dir = vim.fn.trim(M.run_git_cmd "git rev-parse --show-toplevel")
+  local file = vim.fn.expand "%"
 
   if file == "" or file == "." or dir == "" then
     return ""
   else
     return dir
   end
+end
+
+function M.get_current_branch_name()
+  --TODO: Remove gitsigns dependency
+  local gsd = vim.b.gitsigns_status_dict
+  if gsd and gsd.head and #gsd.head > 0 then
+    return gsd.head
+  end
+
+  return M.run_git_cmd 'git rev-parse --abbrev-ref HEAD | tr -d "\n"'
 end
 
 M.handle_job_data = function(data)
