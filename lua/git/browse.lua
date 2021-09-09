@@ -1,5 +1,6 @@
 local config = require("git.config").config
 local utils = require "git.utils"
+local git = require "git.utils.git"
 
 local M = {}
 
@@ -19,8 +20,8 @@ local function open_url(url)
 end
 
 local function get_git_remote_url()
-  local git_root = utils.get_git_repo()
-  local git_remote_url = utils.run_git_cmd("git -C " .. git_root .. ' remote get-url origin | tr -d "\n"')
+  local git_root = git.get_git_repo()
+  local git_remote_url = git.run_git_cmd("git -C " .. git_root .. ' remote get-url origin | tr -d "\n"')
   if git_remote_url == nil then
     return
   end
@@ -45,7 +46,7 @@ local function get_git_remote_url()
 end
 
 local function get_gitlab_merge_request_url(git_remote_url, commit_hash)
-  local merge_request = utils.run_git_cmd(
+  local merge_request = git.run_git_cmd(
     'git ls-remote origin "*/merge-requests/*/head" | grep ' .. commit_hash .. ' | tr -d "\n"'
   )
   if merge_request == nil or merge_request == "" then
@@ -59,7 +60,7 @@ local function get_gitlab_merge_request_url(git_remote_url, commit_hash)
 end
 
 local function get_github_pull_request_url(git_remote_url, commit_hash)
-  local pull_request = utils.run_git_cmd(
+  local pull_request = git.run_git_cmd(
     'git ls-remote origin "refs/pull/*/head" | grep ' .. commit_hash .. ' | tr -d "\n"'
   )
   if pull_request == nil or pull_request == "" then
@@ -73,11 +74,11 @@ local function get_github_pull_request_url(git_remote_url, commit_hash)
 end
 
 local function get_current_branch_name()
-  return utils.get_current_branch_name()
+  return git.get_current_branch_name()
 end
 
 local function get_lastest_commit_hash(branch_name)
-  return utils.run_git_cmd("git rev-parse " .. "origin/" .. branch_name .. ' | tr -d "\n"')
+  return git.run_git_cmd("git rev-parse " .. "origin/" .. branch_name .. ' | tr -d "\n"')
 end
 
 local function get_git_site_type(git_remote_url)
@@ -122,7 +123,7 @@ function M.open(visual_mode)
 
   if vim.fn.expand "%:h" ~= "" then
     -- Git file
-    local git_root = utils.get_git_repo()
+    local git_root = git.get_git_repo()
     local absolute_path = vim.fn.expand "%:p"
     local relative_path = vim.fn.fnamemodify(vim.fn.expand "%", ":~:.")
     if utils.starts_with(absolute_path, git_root) then

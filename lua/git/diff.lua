@@ -1,4 +1,5 @@
 local utils = require "git.utils"
+local git = require "git.utils.git"
 
 local M = {}
 
@@ -47,7 +48,7 @@ function M.open(base)
     return
   end
 
-  local git_root = utils.get_git_repo()
+  local git_root = git.get_git_repo()
   if git_root == "" then
     return
   end
