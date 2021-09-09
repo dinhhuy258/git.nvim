@@ -1,5 +1,17 @@
 local M = {}
 
+local function process_abbrev_head(gitdir, head_str, path)
+  if not gitdir then
+    return head_str
+  end
+
+  if head_str == "HEAD" then
+    return vim.fn.trim(M.run_git_cmd("cd " .. path .. " && git --no-pager rev-parse --short HEAD"))
+  end
+
+  return head_str
+end
+
 function M.starts_with(str, start)
   return str:sub(1, #start) == start
 end
@@ -31,30 +43,23 @@ function M.log(message)
 end
 
 function M.get_git_repo()
-  --TODO: Remove gitsigns dependency
   local gsd = vim.b.gitsigns_status_dict
   if gsd and gsd.root and #gsd.root > 0 then
     return gsd.root
   end
 
-  local dir = vim.fn.trim(M.run_git_cmd "git rev-parse --show-toplevel")
-  local file = vim.fn.expand "%"
-
-  if file == "" or file == "." or dir == "" then
-    return ""
-  else
-    return dir
-  end
+  local git_root, _ = M.get_repo_info()
+  return git_root
 end
 
 function M.get_current_branch_name()
-  --TODO: Remove gitsigns dependency
   local gsd = vim.b.gitsigns_status_dict
   if gsd and gsd.head and #gsd.head > 0 then
     return gsd.head
   end
 
-  return M.run_git_cmd 'git rev-parse --abbrev-ref HEAD | tr -d "\n"'
+  local _, abbrev_head = M.get_repo_info()
+  return abbrev_head
 end
 
 M.handle_job_data = function(data)
@@ -68,6 +73,19 @@ M.handle_job_data = function(data)
     return nil
   end
   return data
+end
+
+function M.get_repo_info()
+  local cwd = vim.fn.expand "%:p:h"
+  local data = vim.fn.trim(
+    M.run_git_cmd("cd " .. cwd .. " && git --no-pager rev-parse --show-toplevel --absolute-git-dir --abbrev-ref HEAD")
+  )
+  local results = M.split(data, "\n")
+
+  local git_root = results[1]
+  local abbrev_head = process_abbrev_head(results[2], results[3], cwd)
+
+  return git_root, abbrev_head
 end
 
 return M
