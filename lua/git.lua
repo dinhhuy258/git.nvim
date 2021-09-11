@@ -32,7 +32,7 @@ function M.setup(cfg)
   vim.cmd [[command! GitDiffClose lua require("git.diff").close()]]
   vim.cmd [[command! -nargs=* Git lua require("git.cmd").cmd(<f-args>)]]
 
-  vim.cmd [[command! GitRevert lua require("git.revert").revert()]]
+  vim.cmd [[command! GitRevert lua require("git.revert").open()]]
 end
 
 return M
