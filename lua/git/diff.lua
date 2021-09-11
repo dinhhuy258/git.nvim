@@ -57,52 +57,14 @@ function M.open(base)
     base = "HEAD"
   end
 
+  diff_state.base_bufnr = vim.api.nvim_get_current_buf()
+
   local file_content_cmd = "git -C "
     .. git_root
     .. string.format(" --literal-pathspecs --no-pager show %s:", base)
     .. vim.fn.fnamemodify(vim.fn.expand "%", ":~:.")
 
-  local has_error = false
-  local lines = {}
-
-  local function on_event(_, data, event)
-    if event == "stdout" then
-      data = utils.handle_job_data(data)
-      if not data then
-        return
-      end
-
-      for i = 1, #data do
-        table.insert(lines, data[i])
-      end
-    elseif event == "stderr" then
-      data = utils.handle_job_data(data)
-      if not data then
-        return
-      end
-
-      has_error = true
-      local error_message = ""
-      for _, line in ipairs(data) do
-        error_message = error_message .. line
-      end
-      utils.log("Failed to open git diff window: " .. error_message)
-    elseif event == "exit" then
-      if not has_error then
-        on_get_file_content_done(lines)
-      end
-    end
-  end
-
-  diff_state.base_bufnr = vim.api.nvim_get_current_buf()
-
-  vim.fn.jobstart(file_content_cmd, {
-    on_stderr = on_event,
-    on_stdout = on_event,
-    on_exit = on_event,
-    stdout_buffered = true,
-    stderr_buffered = true,
-  })
+  utils.jobstart(file_content_cmd, on_get_file_content_done)
 end
 
 return M

@@ -34,7 +34,7 @@ function M.log(message)
   vim.notify("[git] " .. message)
 end
 
-function M.start_job(cmd, on_finish)
+function M.jobstart(cmd, on_finish)
   local has_error = false
   local lines = {}
 

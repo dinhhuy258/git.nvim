@@ -61,7 +61,7 @@ function M.open()
     vim.api.nvim_buf_set_option(buf, "modifiable", false)
   end
 
-  utils.start_job(git_log_cmd, on_get_log_done)
+  utils.jobstart(git_log_cmd, on_get_log_done)
 end
 
 function M.revert()
