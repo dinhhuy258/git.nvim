@@ -61,6 +61,10 @@ require('git').setup({
     diff = "<Leader>gd",
     -- Close git diff
     diff_close = "<Leader>gD",
+    -- Revert to the specific commit
+    revert = "<Leader>gr",
+    -- Revert the current file to the specific commit
+    revert_file = "<Leader>gR",
   },
   -- Default target branch when create a pull request
   target_branch = "master",
@@ -84,6 +88,10 @@ Eg:
 Eg: 
 `:GitCreatePullRequest`
 `:GitCreatePullRequest test_branch`
+
+`:GitRevert` revert to specific commit
+
+`:GitRevertFile` revert the current file to specific commit
 
 ## Issues
 

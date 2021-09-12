@@ -3,6 +3,10 @@ local git = require "git.utils.git"
 
 local M = {}
 
+local revert_state = {
+  file = "",
+}
+
 local win, buf
 
 local function create_revert_window()
@@ -45,11 +49,24 @@ function M.close()
   buf = nil
 end
 
-function M.open()
+function M.open(current_file)
   local git_root, _ = git.get_repo_info()
   local git_log_cmd = "git -C "
     .. git_root
     .. ' --no-pager -c diff.context=0 -c diff.noprefix=false log --no-color --no-ext-diff --pretty="format:%H %s"'
+
+  if current_file then
+    local file = vim.fn.expand "%:p"
+    if file == nil or file == "" then
+      utils.log "Please open the file that you want to revert"
+      return
+    end
+
+    git_log_cmd = git_log_cmd .. " -- " .. file
+    revert_state.file = file
+  else
+    revert_state.file = ""
+  end
 
   local function on_get_log_done(lines)
     if #lines <= 0 then
@@ -71,13 +88,23 @@ function M.revert()
   end
   local commit_hash = utils.split(line, " ")[1]
   local git_root, _ = git.get_repo_info()
+
   local revert_cmd = "git -C " .. git_root .. " revert --no-commit " .. commit_hash
+  if revert_state.file ~= "" then
+    revert_cmd = "git -C " .. git_root .. " checkout " .. commit_hash .. " -- " .. revert_state.file
+  end
+
+  vim.notify(revert_cmd)
 
   git.run_git_cmd(revert_cmd)
 
   M.close()
 
-  utils.log("Revert to commit " .. commit_hash)
+  if revert_state.file ~= "" then
+    utils.log("Revert " .. revert_state.file .. " to commit " .. commit_hash)
+  else
+    utils.log("Revert to commit " .. commit_hash)
+  end
 end
 
 return M

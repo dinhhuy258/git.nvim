@@ -12,6 +12,8 @@ local default_cfg = {
     create_pull_request = "<Leader>gn",
     diff = "<Leader>gd",
     diff_close = "<Leader>gD",
+    revert = "<Leader>gr",
+    revert_file = "<Leader>gR",
   },
   target_branch = "master",
 }
