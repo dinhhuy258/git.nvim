@@ -29,6 +29,7 @@ use {
 - Open git blame window, press enter on a line to view the commit where the line changed
 - Open git browse, open pull request, create pull request in Github and Gitlab
 - Git diff
+- Git revert
 
 For more information please refer this [file](https://github.com/dinhhuy258/git.nvim/blob/main/lua/git.lua)
 
