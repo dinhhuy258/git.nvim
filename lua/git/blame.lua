@@ -125,9 +125,11 @@ end
 
 local function on_blame_commit_done(commit_hash, lines)
   -- TODO: Find a better way to handle this case
-  while #lines ~= 0 and not utils.starts_with(lines[1], "diff") do
-    table.remove(lines, 1)
+  local idx = 1
+  while idx <= #lines and not utils.starts_with(lines[idx], "diff") do
+    idx = idx + 1
   end
+  table.insert(lines, idx, "")
 
   local temp_file = vim.fn.tempname()
   blame_state.temp_file = temp_file
@@ -171,12 +173,11 @@ function M.blame_commit()
   end
 
   commit_hash = string.gsub(commit_hash, "\n", "")
-  local diff_cmd = "git --literal-pathspecs --no-pager show --no-color --pretty=format:%b "
-    .. commit_hash
-    .. "^-"
-    .. " -C "
+  local diff_cmd = "git -C "
     .. blame_state.git_root
-    .. " "
+    .. " --literal-pathspecs --no-pager show --no-color "
+    .. commit_hash
+    .. " -- "
     .. blame_state.file
 
   local lines = {}
