@@ -5,9 +5,9 @@ local git = require "git.utils.git"
 local M = {}
 
 local blame_state = {
-  file = "",
   temp_file = "",
   starting_win = "",
+  file_name = "",
   relative_path = "",
   git_root = "",
 }
@@ -83,7 +83,6 @@ local function on_blame_done(lines)
   local current_pos = vim.fn.line "."
 
   -- Save the state
-  blame_state.file = vim.api.nvim_buf_get_name(0)
   blame_state.starting_win = starting_win
 
   local blame_win, blame_buf = create_blame_win()
@@ -147,7 +146,11 @@ local function on_blame_commit_done(commit_hash, lines)
   vim.api.nvim_buf_set_option(buf, "bufhidden", "delete")
   vim.api.nvim_command "autocmd BufLeave <buffer> lua require('git.blame').blame_commit_quit()"
 
-  vim.fn.search([[^diff .* b/\M]] .. vim.fn.escape(blame_state.relative_path, "\\") .. "$", "W")
+  if vim.fn.search([[^diff .* b/\M]] .. vim.fn.escape(blame_state.relative_path, "\\") .. "$", "W") == 0 then
+    vim.fn.search([[^diff .* b/.*]] .. blame_state.file_name .. "$", "W")
+  end
+
+  vim.cmd "normal! zt"
 end
 
 function M.blame_commit_quit()
@@ -177,8 +180,6 @@ function M.blame_commit()
     .. blame_state.git_root
     .. " --literal-pathspecs --no-pager show --no-color "
     .. commit_hash
-    .. " -- "
-    .. blame_state.file
 
   local lines = {}
   local function on_event(_, data, event)
@@ -227,6 +228,7 @@ function M.blame()
   end
   blame_state.git_root = git_root
   blame_state.relative_path = vim.fn.fnamemodify(vim.fn.expand "%", ":~:.")
+  blame_state.file_name = vim.fn.fnamemodify(vim.fn.expand "%:t", ":~:.")
 
   local blame_cmd = "git -C "
     .. git_root
