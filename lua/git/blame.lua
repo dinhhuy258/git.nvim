@@ -79,7 +79,7 @@ end
 
 local function on_blame_done(lines)
   local starting_win = vim.api.nvim_get_current_win()
-  local current_top = vim.fn.line "w0" + vim.wo.scrolloff
+  local current_top = vim.fn.line "w0" + vim.api.nvim_get_option('scrolloff')
   local current_pos = vim.fn.line "."
 
   -- Save the state
