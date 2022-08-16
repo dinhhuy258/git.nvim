@@ -73,7 +73,6 @@ function M.setup(cfg)
     {
       bang = true,
     })
-  vim.cmd [[command!  ]]
 end
 
 return M
