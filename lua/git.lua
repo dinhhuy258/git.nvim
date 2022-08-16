@@ -61,8 +61,8 @@ function M.setup(cfg)
     })
 
   vim.api.nvim_create_user_command(
-  'GitRevert',
-  'lua require("git.revert").open(false)',
+    'GitRevert',
+    'lua require("git.revert").open(false)',
     {
       bang = true,
     })
