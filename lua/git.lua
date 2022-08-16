@@ -29,13 +29,50 @@ function M.setup(cfg)
   vim.api.nvim_set_keymap("n", cfg.keymaps.revert, "<CMD>lua require('git.revert').open(false)<CR>", options)
   vim.api.nvim_set_keymap("n", cfg.keymaps.revert_file, "<CMD>lua require('git.revert').open(true)<CR>", options)
 
-  vim.cmd [[command! -nargs=* GitCreatePullRequest lua require('git.browse').create_pull_request(<f-args>)]]
-  vim.cmd [[command! -nargs=* GitDiff lua require("git.diff").open(<f-args>)]]
-  vim.cmd [[command! GitDiffClose lua require("git.diff").close()]]
-  vim.cmd [[command! -nargs=* Git lua require("git.cmd").cmd(<f-args>)]]
+  vim.api.nvim_create_user_command(
+    'GitCreatePullRequest',
+    'lua require("git.browse").create_pull_request(<f-args>)',
+    {
+      bang = true,
+      nargs = '*',
+    })
 
-  vim.cmd [[command! GitRevert lua require("git.revert").open(false)]]
-  vim.cmd [[command! GitRevertFile lua require("git.revert").open(true)]]
+  vim.api.nvim_create_user_command(
+    'GitDiff',
+    'lua require("git.diff").open(<f-args>)',
+    {
+      bang = true,
+      nargs = '*',
+    })
+
+  vim.api.nvim_create_user_command(
+    'GitDiffClose',
+    'lua require("git.diff").close()',
+    {
+      bang = true,
+    })
+
+  vim.api.nvim_create_user_command(
+    'Git',
+    'lua require("git.cmd").cmd(<f-args>)',
+    {
+      bang = true,
+      nargs = '*',
+    })
+
+  vim.api.nvim_create_user_command(
+    'GitRevert',
+    'lua require("git.revert").open(false)',
+    {
+      bang = true,
+    })
+
+  vim.api.nvim_create_user_command(
+    'GitRevertFile',
+    'lua require("git.revert").open(true)',
+    {
+      bang = true,
+    })
 end
 
 return M
