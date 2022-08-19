@@ -59,10 +59,14 @@ function M.open(base)
 
   diff_state.base_bufnr = vim.api.nvim_get_current_buf()
 
+  local cwd = vim.fn.getcwd() -- save current dir
+  vim.fn.chdir(git_root)
+  local path_relative_to_git_root = vim.fn.expand '%:.'
+  vim.fn.chdir(cwd) -- restore
   local file_content_cmd = "git -C "
-    .. git_root
-    .. string.format(" --literal-pathspecs --no-pager show %s:", base)
-    .. vim.fn.fnamemodify(vim.fn.expand "%", ":~:.")
+      .. git_root
+      .. string.format(" --literal-pathspecs --no-pager show %s:", base)
+      .. path_relative_to_git_root
 
   utils.jobstart(file_content_cmd, on_get_file_content_done)
 end
