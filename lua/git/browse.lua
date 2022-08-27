@@ -129,6 +129,10 @@ function M.open(visual_mode)
     if utils.starts_with(absolute_path, git_root) then
       relative_path = absolute_path:sub(#git_root + 1)
     end
+    if utils.starts_with(relative_path, "/") then
+      -- Delete the prefix /
+      relative_path = relative_path:sub(2)
+    end
 
     local git_url = git_remote_url .. "/blob/" .. branch_name .. "/" .. relative_path
 
