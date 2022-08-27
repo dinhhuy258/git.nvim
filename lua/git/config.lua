@@ -2,18 +2,22 @@ local M = {}
 
 M.config = {}
 
+local default_keymaps_cfg = {
+  blame = "<Leader>gb",
+  browse = "<Leader>go",
+  open_pull_request = "<Leader>gp",
+  create_pull_request = "<Leader>gn",
+  diff = "<Leader>gd",
+  diff_close = "<Leader>gD",
+  revert = "<Leader>gr",
+  revert_file = "<Leader>gR",
+}
+
 local default_cfg = {
   keymaps = {
-    blame = "<Leader>gb",
+    custom_only = false,
     quit_blame = "q",
     blame_commit = "<CR>",
-    browse = "<Leader>go",
-    open_pull_request = "<Leader>gp",
-    create_pull_request = "<Leader>gn",
-    diff = "<Leader>gd",
-    diff_close = "<Leader>gD",
-    revert = "<Leader>gr",
-    revert_file = "<Leader>gR",
   },
   target_branch = "master",
 }
@@ -32,6 +36,14 @@ function M.setup(cfg)
       end
     else
       M.config[k] = default_cfg[k]
+    end
+  end
+
+  if not M.config.keymaps.custom_only then
+    for k, v in pairs(default_keymaps_cfg) do
+      if M.config.keymaps[k] == nil then
+        M.config.keymaps[k] = v
+      end
     end
   end
 end
