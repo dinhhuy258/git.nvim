@@ -45,11 +45,11 @@ Configuration can be passed to the setup function. Here is an example with most 
 
 ```lua
 require('git').setup({
+  default_mappings = true, -- NOTE: `quit_blame` and `blame_commit` are still merged to the keymaps even if `default_mappings = false`
+
   keymaps = {
     -- custom only false will merge the custom mappings with the default mappings
     -- if true, it will only use your key mappings
-    -- NOTE: `quit_blame` and `blame_commit` are still merged to the keymaps even if `custom_only = true`
-    custom_only = false,
     -- Open blame window
     blame = "<Leader>gb",
     -- Close blame window

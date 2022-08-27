@@ -14,8 +14,8 @@ local default_keymaps_cfg = {
 }
 
 local default_cfg = {
+  default_mappings = true,
   keymaps = {
-    custom_only = false,
     quit_blame = "q",
     blame_commit = "<CR>",
   },
@@ -39,7 +39,7 @@ function M.setup(cfg)
     end
   end
 
-  if not M.config.keymaps.custom_only then
+  if M.config.default_mappings then
     for k, v in pairs(default_keymaps_cfg) do
       if M.config.keymaps[k] == nil then
         M.config.keymaps[k] = v
