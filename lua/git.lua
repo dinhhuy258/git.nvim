@@ -33,6 +33,11 @@ local function config_keymaps()
 end
 
 local function config_commands()
+  vim.api.nvim_create_user_command("GitBlame", 'lua require("git.blame").blame()<CR>', {
+    bang = true,
+    nargs = "*",
+  })
+
   vim.api.nvim_create_user_command("GitCreatePullRequest", 'lua require("git.browse").create_pull_request(<f-args>)', {
     bang = true,
     nargs = "*",
