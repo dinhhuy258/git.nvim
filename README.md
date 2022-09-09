@@ -82,6 +82,8 @@ require('git').setup({
 Eg: 
 `:Git checkout -b test`
 
+`:GitBlame` opens git blame window
+
 `:GitDiff` opens a new diff that compares against the current index. You can also provide any valid git rev to the command. Eg: `:GitDiff HEAD~2`
 
 `:GitDiffClose` close the git diff window
