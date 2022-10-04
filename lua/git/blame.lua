@@ -48,21 +48,18 @@ local function blame_syntax()
     hash = vim.fn.substitute(hash, [[\(\x\x\)]], [[\=printf("%02x", str2nr(submatch(1),16)*3/4+32)]], "g")
     if hash ~= "" and orig_hash ~= "000000" and seen[hash] == nil then
       seen[hash] = 1
-      if vim.wo.t_Co == "256" then
-        local colors = vim.fn.map(vim.fn.matchlist(orig_hash, [[\(\x\)\x\(\x\)\x\(\x\)\x]]), "str2nr(v:val,16)")
-        local r = colors[2]
-        local g = colors[3]
-        local b = colors[4]
-        local color = 16 + (r + 1) / 3 * 36 + (g + 1) / 3 * 6 + (b + 1) / 3
-        if color == 16 then
-          color = 235
-        elseif color == 231 then
-          color = 255
-        end
-        hash_colors[hash] = " ctermfg=" .. tostring(color)
-      else
-        hash_colors[hash] = ""
+      local colors = vim.fn.map(vim.fn.matchlist(orig_hash, [[\(\x\)\x\(\x\)\x\(\x\)\x]]), "str2nr(v:val,16)")
+      local r = colors[2]
+      local g = colors[3]
+      local b = colors[4]
+      local color = 16 + (r + 1) / 3 * 36 + (g + 1) / 3 * 6 + (b + 1) / 3
+      if color == 16 then
+        color = 235
+      elseif color == 231 then
+        color = 255
       end
+
+      hash_colors[hash] = " ctermfg=" .. tostring(color)
       local pattern = vim.fn.substitute(orig_hash, [[^\(\x\)\x\(\x\)\x\(\x\)\x$]], [[\1\\x\2\\x\3\\x]], "") .. [[*\>]]
       vim.cmd("syn match GitNvimBlameHash" .. hash .. [[       "\%(^\^\=[*?]*\)\@<=]] .. pattern .. [[" skipwhite]])
     end
