@@ -39,13 +39,15 @@ local function clear_state()
   status_state.output = {}
 end
 
-local function on_status_done(lines)
+local function render(lines, open_new_buffer)
   while #lines > 0 and string.find(lines[1], "^%l+:") do
     table.remove(lines, 1)
   end
 
-  -- open a new buffer
-  vim.api.nvim_command "tabedit"
+  if open_new_buffer then
+    vim.api.nvim_command "tabedit"
+  end
+
   local head = vim.fn.matchstr(lines[1], [[^## \zs\S\+\ze\%($\| \[\)]])
   local branch = ""
 
@@ -87,9 +89,18 @@ local function on_status_done(lines)
   add_section("Unstaged", status_state.unstaged)
   add_section("Staged", status_state.staged)
 
+  vim.api.nvim_buf_set_option(status_buf, "modifiable", true)
   vim.api.nvim_buf_set_lines(status_buf, 0, -1, true, status_state.output)
   vim.api.nvim_buf_set_option(status_buf, "modifiable", false)
 
+  -- Keymaps
+  local options = {
+    noremap = true,
+    silent = true,
+    expr = false,
+  }
+  vim.api.nvim_buf_set_keymap(0, "n", "q", "<CMD>q<CR>", options)
+  vim.api.nvim_buf_set_keymap(0, "n", "<space>", "<CMD>lua require('git.status').toggle_status()<CR>", options)
   -- vim.api.nvim_buf_set_name(buf, "~/" .. buf_name)
   -- vim.api.nvim_buf_set_option(buf, "buftype", "nofile")
   -- vim.api.nvim_buf_set_option(buf, "bufhidden", "delete")
@@ -97,18 +108,66 @@ local function on_status_done(lines)
   -- vim.api.nvim_command "autocmd BufDelete <buffer> lua require('git.diff').on_diff_quit()"
 end
 
-function M.open()
-  local fpath = vim.api.nvim_buf_get_name(0)
-  if fpath == "" or fpath == nil then
+local function on_refresh_done(lines)
+  render(lines, false)
+end
+
+local function on_status_done(lines)
+  render(lines, true)
+end
+
+local function get_status_cmd()
+  local git_root = git.get_git_repo()
+  if git_root == "" then
+    return nil
+  end
+
+  return "git -C " .. git_root .. " --no-optional-locks status --porcelain -b"
+end
+
+local function refresh()
+  local status_cmd = get_status_cmd()
+  if status_cmd == nil then
     return
   end
 
+  utils.jobstart(status_cmd, on_refresh_done)
+end
+
+local function on_cmd_done(lines)
+  refresh()
+end
+
+function M.toggle_status()
+  local line = vim.api.nvim_get_current_line()
+  if line == nil or line == "" then
+    return
+  end
   local git_root = git.get_git_repo()
   if git_root == "" then
     return
   end
+  local cmd = ""
+  if utils.starts_with(line, "Unstaged ") then
+    cmd = "git -C " .. git_root .. " add -u"
+  elseif utils.starts_with(line, "Untracked ") then
+    cmd = "git -C " .. git_root .. " add ."
+  elseif utils.starts_with(line, "Staged ") then
+    cmd = "git -C " .. git_root .. " reset -q"
+  end
 
-  local status_cmd = "git -C " .. git_root .. " --no-optional-locks status --porcelain -b"
+  if cmd == "" then
+    return
+  end
+
+  utils.jobstart(cmd, on_cmd_done)
+end
+
+function M.open()
+  local status_cmd = get_status_cmd()
+  if status_cmd == nil then
+    return
+  end
 
   utils.jobstart(status_cmd, on_status_done)
 end
