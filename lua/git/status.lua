@@ -93,6 +93,9 @@ local function render(lines, open_new_buffer)
   vim.api.nvim_buf_set_lines(status_buf, 0, -1, true, status_state.output)
   vim.api.nvim_buf_set_option(status_buf, "modifiable", false)
 
+  vim.api.nvim_buf_set_option(status_buf, "buftype", "nofile")
+  vim.api.nvim_buf_set_option(status_buf, "bufhidden", "delete")
+
   -- Keymaps
   local options = {
     noremap = true,
@@ -101,11 +104,7 @@ local function render(lines, open_new_buffer)
   }
   vim.api.nvim_buf_set_keymap(0, "n", "q", "<CMD>q<CR>", options)
   vim.api.nvim_buf_set_keymap(0, "n", "<space>", "<CMD>lua require('git.status').toggle_status()<CR>", options)
-  -- vim.api.nvim_buf_set_name(buf, "~/" .. buf_name)
-  -- vim.api.nvim_buf_set_option(buf, "buftype", "nofile")
-  -- vim.api.nvim_buf_set_option(buf, "bufhidden", "delete")
-  -- vim.api.nvim_buf_set_option(buf, "modifiable", false)
-  -- vim.api.nvim_command "autocmd BufDelete <buffer> lua require('git.diff').on_diff_quit()"
+  vim.api.nvim_buf_set_keymap(0, "n", "r", "<CMD>lua require('git.status').refresh<CR>", options)
 end
 
 local function on_refresh_done(lines)
@@ -138,6 +137,16 @@ local function on_cmd_done(lines)
   refresh()
 end
 
+local function contains_file(files, file)
+  for _, f in ipairs(files) do
+    if f.file == file then
+      return true
+    end
+  end
+
+  return false
+end
+
 function M.toggle_status()
   local line = vim.api.nvim_get_current_line()
   if line == nil or line == "" then
@@ -147,6 +156,7 @@ function M.toggle_status()
   if git_root == "" then
     return
   end
+
   local cmd = ""
   if utils.starts_with(line, "Unstaged ") then
     cmd = "git -C " .. git_root .. " add -u"
@@ -154,6 +164,18 @@ function M.toggle_status()
     cmd = "git -C " .. git_root .. " add ."
   elseif utils.starts_with(line, "Staged ") then
     cmd = "git -C " .. git_root .. " reset -q"
+  elseif utils.contains(line, " ") then
+    local file = utils.split(line, " ")[2]
+    --FIXME: I know that this is not a good way to find the toggle command for the current line
+    -- I know that we can do better, however for sake of simplicity I would like brute force to find the appropriate cmd
+    -- The git status files size is not large, I don't think it bring a big impact to the plugin's performance
+    if contains_file(status_state.staged, file) then
+      cmd = "git -C " .. git_root .. " reset -q -- " .. file
+    elseif contains_file(status_state.unstaged, file) then
+      cmd = "git -C " .. git_root .. " add -A -- " .. file
+    elseif contains_file(status_state.untracked, file) then
+      cmd = "git -C " .. git_root .. " add -- " .. file
+    end
   end
 
   if cmd == "" then
