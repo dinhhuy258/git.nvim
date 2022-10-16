@@ -64,6 +64,10 @@ local function config_commands()
   vim.api.nvim_create_user_command("GitRevertFile", 'lua require("git.revert").open(true)', {
     bang = true,
   })
+
+  vim.api.nvim_create_user_command("GitStatus", 'lua require("git.status").open(true)', {
+    bang = true,
+  })
 end
 
 function M.setup(cfg)

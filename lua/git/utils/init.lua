@@ -8,6 +8,10 @@ function M.end_with(str, ending)
   return ending == "" or str:sub(-#ending) == ending
 end
 
+function M.contains(str, sub_str)
+  return str:find(sub_str, 1, true)
+end
+
 function M.split(s, delimiter)
   local result = {}
   for match in (s .. delimiter):gmatch("(.-)" .. delimiter) do
