@@ -1,3 +1,4 @@
+local Job = require "plenary.job"
 local utils = require "git.utils"
 local git = require "git.utils.git"
 
@@ -32,6 +33,48 @@ local function add_section(section_name, items)
   add_blankline()
 end
 
+local function query_log(refspec, limit)
+  local git_root = git.get_git_repo()
+  if git_root == "" then
+    return nil
+  end
+
+  local lines_string = ""
+  local stderr = {}
+  local stdout, _ = Job:new({
+    command = "git",
+    args = { "log", "-n", limit, "--pretty=format:%h%x09%s", refspec, "--" },
+    cwd = git_root,
+    on_stderr = function(_, data)
+      table.insert(stderr, data)
+    end,
+  }):sync()
+
+  if not vim.tbl_isempty(stderr) then
+    return {}
+  end
+
+  return vim.tbl_map(function(line)
+    local line_components = utils.split(line, "\t")
+
+    return line_components[1] .. " " .. line_components[2]
+  end, stdout)
+end
+
+local function add_log_section(section_name, refspec)
+  local limit = 256
+  local lines = query_log(refspec, limit)
+
+  if #lines == 0 then
+    return
+  end
+
+  table.insert(status_state.output, section_name .. " (" .. tostring(#lines) .. ")")
+  for _, log in ipairs(lines) do
+    table.insert(status_state.output, log)
+  end
+end
+
 local function clear_state()
   status_state.untracked = {}
   status_state.unstaged = {}
@@ -50,13 +93,17 @@ local function render(lines, open_new_buffer)
 
   local head = vim.fn.matchstr(lines[1], [[^## \zs\S\+\ze\%($\| \[\)]])
   local branch = ""
+  local pull = ""
 
   if utils.contains(head, "...") then
-    head = vim.fn.split(head, [[\.\.\.]])[1]
+    local head_pull = vim.fn.split(head, [[\.\.\.]])
+    head = head_pull[1]
+    pull = head_pull[2]
     branch = head
   elseif head == "HEAD" or head == "" then
+    --FIXME: Is this correct?
     head = git.get_current_branch_name()
-    branch = head
+    branch = ""
   else
     branch = head
   end
@@ -88,6 +135,10 @@ local function render(lines, open_new_buffer)
   add_section("Untracked", status_state.untracked)
   add_section("Unstaged", status_state.unstaged)
   add_section("Staged", status_state.staged)
+
+  if pull ~= "" then
+    add_log_section("Unpulled from " .. pull, head .. ".." .. pull)
+  end
 
   vim.api.nvim_buf_set_option(status_buf, "modifiable", true)
   vim.api.nvim_buf_set_lines(status_buf, 0, -1, true, status_state.output)
@@ -167,7 +218,7 @@ function M.toggle_status()
   elseif utils.contains(line, " ") then
     local file = utils.split(line, " ")[2]
     --FIXME: I know that this is not a good way to find the toggle command for the current line
-    -- I know that we can do better, however for sake of simplicity I would like brute force to find the appropriate cmd
+    -- I can do better, however for sake of simplicity I would like brute force to find the appropriate cmd
     -- The git status files size is not large, I don't think it bring a big impact to the plugin's performance
     if contains_file(status_state.staged, file) then
       cmd = "git -C " .. git_root .. " reset -q -- " .. file
