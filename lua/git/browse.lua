@@ -36,6 +36,15 @@ local function get_git_remote_url()
     git_remote_url = "https://" .. git_remote_url
   end
 
+  if utils.starts_with(git_remote_url, "ssh://") then
+    git_remote_url = git_remote_url:sub(#"ssh://" + 1)
+    git_remote_url = "https://" .. git_remote_url
+  end
+
+  if utils.starts_with(git_remote_url, "github.com:") then
+    git_remote_url = "https://" .. git_remote_url
+  end
+
   git_remote_url = git_remote_url:gsub("com:", "com/")
 
   if utils.end_with(git_remote_url, ".git") then
