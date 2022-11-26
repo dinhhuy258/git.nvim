@@ -1,12 +1,14 @@
-local Job = require "plenary.job"
 local utils = require "git.utils"
 local git = require "git.utils.git"
 
 local status_state = {
   bufnr = -1,
+
   untracked = {},
   unstaged = {},
   staged = {},
+  unpulled = {},
+
   output = {},
 }
 
@@ -20,26 +22,6 @@ local function contains_file(files, file)
   end
 
   return false
-end
-
---TODO: Move this method to git utils
-local function git_cmd(args)
-  local git_root = git.get_git_repo()
-  if git_root == "" then
-    return 1, { "" }
-  end
-
-  local stderr = {}
-  local stdout, ret = Job:new({
-    command = "git",
-    args = args,
-    cwd = git_root,
-    on_stderr = function(_, data)
-      table.insert(stderr, data)
-    end,
-  }):sync()
-
-  return ret, stdout, stderr
 end
 
 local function add_blankline()
@@ -65,12 +47,7 @@ local function add_section(section_name, items)
 end
 
 local function query_log(refspec, limit)
-  local git_root = git.get_git_repo()
-  if git_root == "" then
-    return nil
-  end
-
-  local _, stdout, stderr = git_cmd { "log", "-n", limit, "--pretty=format:%h%x09%s", refspec, "--" }
+  local _, stdout, stderr = git.git_cmd { "log", "-n", limit, "--pretty=format:%h%x09%s", refspec, "--" }
   if not vim.tbl_isempty(stderr) then
     return {}
   end
@@ -82,14 +59,7 @@ local function query_log(refspec, limit)
   end, stdout)
 end
 
-local function add_log_section(section_name, refspec)
-  local limit = 256
-  local lines = query_log(refspec, limit)
-
-  if #lines == 0 then
-    return
-  end
-
+local function add_log_section(section_name, lines)
   table.insert(status_state.output, section_name .. " (" .. tostring(#lines) .. ")")
   for _, log in ipairs(lines) do
     table.insert(status_state.output, log)
@@ -101,6 +71,7 @@ local function clear_state()
   status_state.unstaged = {}
   status_state.staged = {}
   status_state.output = {}
+  status_state.unpulled_commits = {}
 end
 
 local function render(lines)
@@ -161,7 +132,15 @@ local function render(lines)
   add_section("Staged", status_state.staged)
 
   if pull ~= "" then
-    add_log_section("Unpulled from " .. pull, head .. ".." .. pull)
+    local logs = query_log(head .. ".." .. pull, 256)
+    for _, log in ipairs(logs) do
+      local commit = utils.split(log, ' ')[1]
+      table.insert(status_state.unpulled_commits, commit)
+    end
+
+    if #status_state.unpulled_commits ~= 0 then
+      add_log_section("Unpulled from " .. pull, logs)
+    end
   end
 
   vim.api.nvim_buf_set_option(status_buf, "modifiable", true)
@@ -195,6 +174,8 @@ function M.toggle_status()
     cmd_args = { "add", "." }
   elseif utils.starts_with(line, "Staged ") then
     cmd_args = { "reset", "-q" }
+  elseif utils.starts_with(line, "Unpulled from ") then
+    cmd_args = { "rebase" }
   elseif utils.contains(line, " ") then
     local file = utils.split(line, " ")[2]
     --FIXME: I know that this is not a good way to find the toggle command for the current line
@@ -213,13 +194,13 @@ function M.toggle_status()
     return
   end
 
-  git_cmd(cmd_args)
+  git.git_cmd(cmd_args)
   -- reload status
   M.open()
 end
 
 function M.open()
-  local _, lines, _ = git_cmd { "--no-optional-locks", "status", "--porcelain", "-b" }
+  local _, lines, _ = git.git_cmd { "--no-optional-locks", "status", "--porcelain", "-b" }
   render(lines)
 end
 

@@ -1,3 +1,4 @@
+local Job = require "plenary.job"
 local utils = require "git.utils"
 
 local M = {}
@@ -54,6 +55,25 @@ function M.get_repo_info()
   local abbrev_head = process_abbrev_head(results[2], results[3], cwd)
 
   return git_root, abbrev_head
+end
+
+function M.git_cmd(args)
+  local git_root = M.get_git_repo()
+  if git_root == "" then
+    return 1, { "" }
+  end
+
+  local stderr = {}
+  local stdout, ret = Job:new({
+    command = "git",
+    args = args,
+    cwd = git_root,
+    on_stderr = function(_, data)
+      table.insert(stderr, data)
+    end,
+  }):sync()
+
+  return ret, stdout, stderr
 end
 
 return M
