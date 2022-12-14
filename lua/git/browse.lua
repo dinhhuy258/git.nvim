@@ -54,9 +54,9 @@ local function get_git_remote_url()
   return git_remote_url
 end
 
-local function get_gitlab_merge_request_url(git_remote_url, commit_hash)
+local function get_gitlab_merge_request_url(git_root, git_remote_url, commit_hash)
   local merge_request = git.run_git_cmd(
-    'git ls-remote origin "*/merge-requests/*/head" | grep ' .. commit_hash .. ' | tr -d "\n"'
+    "git -C " .. git_root .. ' ls-remote origin "*/merge-requests/*/head" | grep ' .. commit_hash .. ' | tr -d "\n"'
   )
   if merge_request == nil or merge_request == "" then
     utils.log("Failed to get merge request from commit hash " .. commit_hash)
@@ -68,9 +68,9 @@ local function get_gitlab_merge_request_url(git_remote_url, commit_hash)
   return git_remote_url .. "/merge_requests/" .. merge_request_id
 end
 
-local function get_github_pull_request_url(git_remote_url, commit_hash)
+local function get_github_pull_request_url(git_root, git_remote_url, commit_hash)
   local pull_request = git.run_git_cmd(
-    'git ls-remote origin "refs/pull/*/head" | grep ' .. commit_hash .. ' | tr -d "\n"'
+    "git -C " .. git_root .. ' ls-remote origin "refs/pull/*/head" | grep ' .. commit_hash .. ' | tr -d "\n"'
   )
   if pull_request == nil or pull_request == "" then
     utils.log("Failed to get pull request from commit hash " .. commit_hash)
@@ -86,8 +86,8 @@ local function get_current_branch_name()
   return git.get_current_branch_name()
 end
 
-local function get_lastest_commit_hash(branch_name)
-  return git.run_git_cmd("git rev-parse " .. "origin/" .. branch_name .. ' | tr -d "\n"')
+local function get_lastest_commit_hash(git_root, branch_name)
+  return git.run_git_cmd("git -C " .. git_root .. " rev-parse " .. "origin/" .. branch_name .. ' | tr -d "\n"')
 end
 
 local function get_git_site_type(git_remote_url)
@@ -174,7 +174,8 @@ function M.pull_request()
 
   utils.log "Opening a pull request..."
 
-  local latest_commit_hash = get_lastest_commit_hash(branch_name)
+  local git_root = git.get_git_repo()
+  local latest_commit_hash = get_lastest_commit_hash(git_root, branch_name)
   if latest_commit_hash == nil then
     utils.log("Failed to get the lastest commit from branch: " .. branch_name)
     return
@@ -182,10 +183,10 @@ function M.pull_request()
 
   local url = nil
   if git_site_type == GitType.GITHUB then
-    url = get_github_pull_request_url(git_remote_url, latest_commit_hash)
+    url = get_github_pull_request_url(git_root, git_remote_url, latest_commit_hash)
   else
     -- Gitlab
-    url = get_gitlab_merge_request_url(git_remote_url, latest_commit_hash)
+    url = get_gitlab_merge_request_url(git_root, git_remote_url, latest_commit_hash)
   end
 
   if url ~= nil then
