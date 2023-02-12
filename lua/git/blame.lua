@@ -9,6 +9,7 @@ local blame_state = {
   starting_win = "",
   file_name = "",
   relative_path = "",
+  wrap = false,
   git_root = "",
 }
 
@@ -76,11 +77,14 @@ end
 
 local function on_blame_done(lines)
   local starting_win = vim.api.nvim_get_current_win()
-  local current_top = vim.fn.line "w0" + vim.api.nvim_get_option('scrolloff')
+  local current_top = vim.fn.line "w0" + vim.api.nvim_get_option "scrolloff"
   local current_pos = vim.fn.line "."
 
   -- Save the state
   blame_state.starting_win = starting_win
+  blame_state.wrap = vim.api.nvim_win_get_option(vim.api.nvim_get_current_win(), "wrap")
+  -- Disable wrap
+  vim.api.nvim_win_set_option(starting_win, "wrap", false)
 
   local blame_win, blame_buf = create_blame_win()
 
@@ -164,9 +168,8 @@ function M.blame_commit()
     return
   end
 
-  local commit_hash = git.run_git_cmd(
-    "git -C " .. blame_state.git_root .. " --literal-pathspecs rev-parse --verify " .. commit .. " --"
-  )
+  local commit_hash =
+    git.run_git_cmd("git -C " .. blame_state.git_root .. " --literal-pathspecs rev-parse --verify " .. commit .. " --")
   if commit_hash == nil then
     utils.log "Commit hash not found"
     return
@@ -211,6 +214,7 @@ end
 function M.blame_quit()
   vim.api.nvim_win_set_option(blame_state.starting_win, "scrollbind", false)
   vim.api.nvim_win_set_option(blame_state.starting_win, "cursorbind", false)
+  vim.api.nvim_win_set_option(blame_state.starting_win, "wrap", blame_state.wrap)
 end
 
 function M.blame()
@@ -223,6 +227,7 @@ function M.blame()
   if git_root == "" then
     return
   end
+
   blame_state.git_root = git_root
   blame_state.relative_path = vim.fn.fnamemodify(vim.fn.expand "%", ":~:.")
   blame_state.file_name = vim.fn.fnamemodify(vim.fn.expand "%:t", ":~:.")

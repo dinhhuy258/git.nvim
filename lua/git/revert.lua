@@ -89,7 +89,7 @@ function M.revert()
   local commit_hash = utils.split(line, " ")[1]
   local git_root, _ = git.get_repo_info()
 
-  local revert_cmd = "git -C " .. git_root .. " revert --no-commit " .. commit_hash .. '..HEAD'
+  local revert_cmd = "git -C " .. git_root .. " revert --no-commit " .. commit_hash .. "..HEAD"
   if revert_state.file ~= "" then
     revert_cmd = "git -C " .. git_root .. " checkout " .. commit_hash .. " -- " .. revert_state.file
   end
