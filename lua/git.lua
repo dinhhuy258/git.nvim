@@ -9,7 +9,7 @@ local function config_keymap(mode, lhs, rhs, options)
 end
 
 local function config_keymaps()
-  cfg = require("git.config").config
+  local cfg = require("git.config").config
 
   local options = {
     noremap = true,
