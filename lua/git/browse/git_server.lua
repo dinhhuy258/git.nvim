@@ -47,7 +47,7 @@ end
 
 function GitServer:_get_latest_commit()
   local latest_commit_hash =
-    git.run_git_cmd("git -C " .. self.git_dir .. " rev-parse " .. "origin/" .. self.branch .. ' | tr -d "\n"')
+    git.run_git_cmd("git -C " .. self.git_dir .. " rev-parse " .. self.branch .. ' | tr -d "\n"')
   if latest_commit_hash == nil or latest_commit_hash == "" then
     log.error("Failed to get the lastest commit from branch: " .. self.branch)
 
