@@ -1,15 +1,21 @@
 local M = {}
 
 function M.info(message)
-  vim.notify("[git] " .. message, vim.log.levels.INFO)
+  vim.schedule(function()
+    vim.notify("[git] " .. message, vim.log.levels.INFO)
+  end)
 end
 
 function M.warn(message)
-  vim.notify("[git] " .. message, vim.log.levels.WARN)
+  vim.schedule(function()
+    vim.notify("[git] " .. message, vim.log.levels.WARN)
+  end)
 end
 
 function M.error(message)
-  vim.notify("[git] " .. message, vim.log.levels.ERROR)
+  vim.schedule(function()
+    vim.notify("[git] " .. message, vim.log.levels.ERROR)
+  end)
 end
 
 return M
