@@ -96,6 +96,26 @@ local function parse_git_status(group, line)
   end
 end
 
+local NAMESPACE_ID = vim.api.nvim_create_namespace "GitHighlights"
+
+--- add the highlights
+---@param bufnr integer
+---@param highlights table
+local function _add_highlights(bufnr, highlights)
+  vim.api.nvim_buf_clear_namespace(bufnr, NAMESPACE_ID, 0, -1)
+
+  for _, highlight in ipairs(highlights) do
+    vim.api.nvim_buf_add_highlight(
+      bufnr,
+      NAMESPACE_ID,
+      highlight.hl_group,
+      highlight.line,
+      highlight.col_start,
+      highlight.col_end
+    )
+  end
+end
+
 local function render()
   local lines = {}
   local hl = {}
@@ -113,6 +133,7 @@ local function render()
   -- status_state.bufnr = status_buf
 
   vim.api.nvim_buf_set_lines(status_buf, 0, -1, true, lines)
+  _add_highlights(status_buf, hl)
 end
 
 local function async_cmd(group, command, args, parse_fn)
