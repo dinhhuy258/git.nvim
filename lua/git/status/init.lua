@@ -1,6 +1,7 @@
 local Loclist = require "git.status.components.loclist"
 local path = require "git.utils.path"
 local log = require "git.utils.log"
+local utils = require "git.utils"
 local has_devicons, devicons = pcall(require, "nvim-web-devicons")
 
 local M = {}
@@ -124,16 +125,42 @@ local function render()
     width = 80,
   }, lines, hl)
 
-
   -- local bufnr = vim.api.nvim_get_current_buf()
   -- if bufnr ~= status_state.bufnr then
   vim.api.nvim_command "tabedit"
   -- end
   local status_buf = vim.api.nvim_get_current_buf()
+  local bufnr = status_buf
   -- status_state.bufnr = status_buf
 
   vim.api.nvim_buf_set_lines(status_buf, 0, -1, true, lines)
   _add_highlights(status_buf, hl)
+
+  local options = { noremap = true, silent = true, nowait = true, buffer = bufnr }
+
+  vim.keymap.set("n", "s", function()
+    local line = vim.fn.line "."
+    local location = loclist:get_location_at(line)
+    if location == nil then
+      return
+    end
+
+    utils.async_cmd("git", { "add", location.filepath }, function()
+      -- async_update_debounced:call()
+    end)
+  end, options)
+
+  vim.keymap.set("n", "u", function()
+    local line = vim.fn.line "."
+    local location = loclist:get_location_at(line)
+    if location == nil then
+      return
+    end
+
+    utils.async_cmd("git", { "restore", "--staged", location.filepath }, function()
+      -- async_update_debounced:call()
+    end)
+  end, options)
 end
 
 local function async_cmd(group, command, args, parse_fn)

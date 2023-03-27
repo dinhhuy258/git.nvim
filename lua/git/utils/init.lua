@@ -76,4 +76,44 @@ function M.jobstart(cmd, on_finish)
   })
 end
 
+function M.async_cmd(cmd, args, callback)
+  local stdout = vim.loop.new_pipe(false)
+  local stderr = vim.loop.new_pipe(false)
+  local handle
+
+  handle = vim.loop.spawn(cmd, { args = args, stdio = { nil, stdout, stderr }, cwd = vim.loop.cwd() }, function()
+    if callback then
+      callback()
+    end
+
+    vim.loop.read_stop(stdout)
+    vim.loop.read_stop(stderr)
+    stdout:close()
+    stderr:close()
+    handle:close()
+  end)
+
+  vim.loop.read_start(stdout, function(err, _)
+    if err ~= nil then
+      vim.schedule(function()
+        -- M.echo_warning(err)
+      end)
+    end
+  end)
+
+  vim.loop.read_start(stderr, function(err, data)
+    if data ~= nil then
+      vim.schedule(function()
+        -- M.echo_warning(data)
+      end)
+    end
+
+    if err ~= nil then
+      vim.schedule(function()
+        -- M.echo_warning(err)
+      end)
+    end
+  end)
+end
+
 return M
