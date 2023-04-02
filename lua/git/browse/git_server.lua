@@ -27,6 +27,7 @@ end
 
 function GitServer:_open(visual_mode)
   local current_file = vim.fn.expand "%:h"
+
   if current_file ~= nil and current_file ~= "" then
     local git_root = git.get_git_repo()
     local absolute_path = vim.fn.expand "%:p"
@@ -36,7 +37,14 @@ function GitServer:_open(visual_mode)
       relative_path = absolute_path:sub(#git_root + 1)
     end
 
+    if utils.starts_with(relative_path, "/") then
+      relative_path = relative_path:sub(2)
+    end
+
     if not visual_mode then
+      local line_number = tostring(vim.fn.line ".")
+      relative_path = relative_path .. "#L" .. line_number
+
       GitServer._open_url(path.join { self.git_url, self.path, "blob", self.branch, relative_path })
 
       return
