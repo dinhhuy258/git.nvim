@@ -20,6 +20,9 @@ local function _get_git_remote_url()
   if remote_url:find "^git@" then
     git_server, git_path = remote_url:match "^git@([^:/]+):(.+)"
     git_server = "https://" .. git_server
+  elseif remote_url:find "^ssh://git@" then
+    git_server, git_path = remote_url:match "^ssh://git@([^:/]+)/(.+)"
+    git_server = "https://" .. git_server
   else
     git_server, git_path = remote_url:match "^(https?://[^/]+)/(.+)"
   end
