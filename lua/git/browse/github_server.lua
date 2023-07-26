@@ -42,7 +42,7 @@ function Github:_open_visual_mode(relative_path, start_line, end_line)
     self.path,
     "blob",
     self.branch,
-    relative_path .. "#LL" .. tostring(start_line) .. "-L" .. tostring(end_line),
+    relative_path .. "#L" .. tostring(start_line) .. "-L" .. tostring(end_line),
   })
 end
 
