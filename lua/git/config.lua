@@ -20,7 +20,17 @@ local default_cfg = {
     blame_commit = "<CR>",
   },
   target_branch = "master",
+  private_gitlabs = {},
 }
+
+function M.is_private_gitlab(host)
+  for _, v in ipairs(M.config.private_gitlabs) do
+    if value == str then
+      return true
+    end
+  end
+  return false
+end
 
 function M.setup(cfg)
   if cfg == nil then
