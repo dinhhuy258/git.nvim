@@ -2,6 +2,7 @@ local git = require "git.utils.git"
 local log = require "git.utils.log"
 local Github = require "git.browse.github_server"
 local Gitlab = require "git.browse.gitlab_server"
+local config = require("git.config")
 
 local GitServerFactory = {}
 
@@ -21,7 +22,7 @@ local function _get_git_remote_url()
     git_server, git_path = remote_url:match "^git@([^:/]+):(.+)"
     git_server = "https://" .. git_server
   elseif remote_url:find "^ssh://git@" then
-    git_server, git_path = remote_url:match "^ssh://git@([^:/]+)/(.+)"
+    git_server, _, git_path = remote_url:match "^ssh://git@([^:/]+)([:%d]*)/(.+)"
     git_server = "https://" .. git_server
   else
     git_server, git_path = remote_url:match "^(https?://[^/]+)/(.+)"
@@ -55,11 +56,11 @@ function GitServerFactory.get_git_server()
     return Github.new(base_url, git_path, git_dir, branch)
   end
 
-  if base_url:find "gitlab" then
+  if base_url:find "gitlab" or config.is_private_gitlab(base_url) then
     return Gitlab.new(base_url, git_path, git_dir, branch)
   end
 
-  log.error "Unsupported git server"
+  log.error("Unsupported git server: " .. base_url)
 
   return nil
 end
