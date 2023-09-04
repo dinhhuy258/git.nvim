@@ -28,6 +28,9 @@ local function create_blame_win()
   vim.api.nvim_buf_set_option(buf, "filetype", "git.nvim")
   vim.api.nvim_buf_set_option(buf, "buflisted", false)
 
+  vim.api.nvim_set_option_value("winbar", "GIT BLAME", {scope="local", win=win })
+
+
   vim.api.nvim_win_set_option(win, "number", false)
   vim.api.nvim_win_set_option(win, "foldcolumn", "0")
   vim.api.nvim_win_set_option(win, "foldenable", false)
