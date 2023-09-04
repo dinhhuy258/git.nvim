@@ -14,6 +14,7 @@ local function create_cmd_win()
   vim.api.nvim_buf_set_option(buf, "swapfile", false)
   vim.api.nvim_buf_set_option(buf, "buflisted", false)
   vim.api.nvim_buf_set_option(buf, "modifiable", false)
+  vim.api.nvim_buf_set_option_value("winbar", "Git CMD", { scope = 'local', win = win })
 
   vim.api.nvim_win_set_option(win, "wrap", false)
   vim.api.nvim_win_set_option(win, "number", false)
