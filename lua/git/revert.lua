@@ -18,7 +18,7 @@ local function create_revert_window()
   vim.api.nvim_buf_set_option(buf, "bufhidden", "hide")
   vim.api.nvim_buf_set_option(buf, "swapfile", false)
   vim.api.nvim_buf_set_option(buf, "buflisted", false)
-  vim.api.nvim_set_option_value("winbar", "Git Revert", {scope = 'local', win = wint })
+
   vim.api.nvim_win_set_option(win, "wrap", false)
   vim.api.nvim_win_set_option(win, "number", false)
   vim.api.nvim_win_set_option(win, "list", false)
