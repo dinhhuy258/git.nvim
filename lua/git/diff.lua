@@ -1,3 +1,4 @@
+local config = require("git.config").config
 local utils = require "git.utils"
 local git = require "git.utils.git"
 
@@ -22,6 +23,9 @@ local function on_get_file_content_done(lines)
   vim.api.nvim_buf_set_option(buf, "bufhidden", "delete")
   vim.api.nvim_buf_set_option(buf, "modifiable", false)
   vim.api.nvim_command "autocmd BufDelete <buffer> lua require('git.diff').on_diff_quit()"
+  if config.winbar then
+    vim.api.nvim_set_option_value("winbar", "Git Diff", { scope = 'local', win = win })
+  end
 end
 
 function M.on_diff_quit()
