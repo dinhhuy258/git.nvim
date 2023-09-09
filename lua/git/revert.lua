@@ -1,3 +1,4 @@
+local config = require("git.config").config
 local utils = require "git.utils"
 local git = require "git.utils.git"
 
@@ -22,6 +23,9 @@ local function create_revert_window()
   vim.api.nvim_win_set_option(win, "wrap", false)
   vim.api.nvim_win_set_option(win, "number", false)
   vim.api.nvim_win_set_option(win, "list", false)
+  if config.winbar then
+    vim.api.nvim_set_option_value("winbar", "Git Revert", {scope = 'local', win = wint })
+  end
 
   -- Keymaps
   local options = {

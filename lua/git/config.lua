@@ -21,6 +21,7 @@ local default_cfg = {
   },
   target_branch = "master",
   private_gitlabs = {},
+  winbar = false
 }
 
 function M.is_private_gitlab(host)
