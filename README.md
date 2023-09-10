@@ -30,6 +30,7 @@ use {
 - Open git browse, open pull request, create pull request in Github and Gitlab
 - Git diff
 - Git revert
+- Works correctly with winbar enabled (or plugins making use of winbar, like barbecue.nvim)
 
 For more information please refer this [file](https://github.com/dinhhuy258/git.nvim/blob/main/lua/git.lua)
 
@@ -72,7 +73,9 @@ require('git').setup({
   -- Default target branch when create a pull request
   target_branch = "master",
   -- Private gitlab hosts, if you use a private gitlab, put your private gitlab host here
-  private_gitlabs = { "https://xxx.git.com" }
+  private_gitlabs = { "https://xxx.git.com" },
+  -- Enable winbar in all windows created by this plugin
+  winbar = false,
 })
 
 ```
