@@ -24,7 +24,7 @@ local function on_get_file_content_done(lines)
   vim.api.nvim_buf_set_option(buf, "modifiable", false)
   vim.api.nvim_command "autocmd BufDelete <buffer> lua require('git.diff').on_diff_quit()"
   if config.winbar then
-    vim.api.nvim_set_option_value("winbar", "Git Diff", { scope = 'local', win = win })
+    vim.api.nvim_set_option_value("winbar", "Git Diff", { scope = "local", win = win })
   end
 end
 
@@ -47,7 +47,7 @@ function M.open(base)
     return
   end
 
-  local fpath = vim.api.nvim_buf_get_name(0)
+  local fpath = utils.escape_parentheses(vim.api.nvim_buf_get_name(0))
   if fpath == "" or fpath == nil then
     return
   end

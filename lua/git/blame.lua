@@ -221,7 +221,7 @@ function M.blame_quit()
 end
 
 function M.blame()
-  local fpath = vim.api.nvim_buf_get_name(0)
+  local fpath = utils.escape_parentheses(vim.api.nvim_buf_get_name(0))
   if fpath == "" or fpath == nil then
     return
   end
