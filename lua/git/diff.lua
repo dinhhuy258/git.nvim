@@ -47,11 +47,6 @@ function M.open(base)
     return
   end
 
-  local fpath = utils.escape_parentheses(vim.api.nvim_buf_get_name(0))
-  if fpath == "" or fpath == nil then
-    return
-  end
-
   local git_root = git.get_git_repo()
   if git_root == "" then
     return
@@ -65,7 +60,8 @@ function M.open(base)
 
   local cwd = vim.fn.getcwd() -- save current dir
   vim.fn.chdir(git_root)
-  local path_relative_to_git_root = vim.fn.expand "%:."
+  local path_relative_to_git_root = utils.escape_parentheses(vim.fn.expand "%:.")
+
   vim.fn.chdir(cwd) -- restore
   local file_content_cmd = "git -C "
     .. git_root
