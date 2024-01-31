@@ -61,7 +61,6 @@ function M.open(base)
   local cwd = vim.fn.getcwd() -- save current dir
   vim.fn.chdir(git_root)
   local path_relative_to_git_root = utils.escape_parentheses(vim.fn.expand "%:.")
-
   vim.fn.chdir(cwd) -- restore
   local file_content_cmd = "git -C "
     .. git_root
