@@ -17,6 +17,13 @@ function M.split(s, delimiter)
   return result
 end
 
+function M.escape_parentheses(str)
+  if type(str) ~= "string" then
+    return ""
+  end
+  return string.gsub(str, "%(", "\\("):gsub("%)", "\\)")
+end
+
 function M.handle_job_data(data)
   if not data then
     return nil

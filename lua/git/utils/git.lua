@@ -44,7 +44,7 @@ function M.get_current_branch_name()
 end
 
 function M.get_repo_info()
-  local cwd = vim.fn.expand "%:p:h"
+  local cwd = utils.escape_parentheses(vim.fn.expand "%:p:h")
   local data = vim.fn.trim(
     M.run_git_cmd("cd " .. cwd .. " && git --no-pager rev-parse --show-toplevel --absolute-git-dir --abbrev-ref HEAD")
   )

@@ -24,7 +24,7 @@ local function on_get_file_content_done(lines)
   vim.api.nvim_buf_set_option(buf, "modifiable", false)
   vim.api.nvim_command "autocmd BufDelete <buffer> lua require('git.diff').on_diff_quit()"
   if config.winbar then
-    vim.api.nvim_set_option_value("winbar", "Git Diff", { scope = 'local', win = win })
+    vim.api.nvim_set_option_value("winbar", "Git Diff", { scope = "local", win = win })
   end
 end
 
@@ -47,11 +47,6 @@ function M.open(base)
     return
   end
 
-  local fpath = vim.api.nvim_buf_get_name(0)
-  if fpath == "" or fpath == nil then
-    return
-  end
-
   local git_root = git.get_git_repo()
   if git_root == "" then
     return
@@ -65,7 +60,7 @@ function M.open(base)
 
   local cwd = vim.fn.getcwd() -- save current dir
   vim.fn.chdir(git_root)
-  local path_relative_to_git_root = vim.fn.expand "%:."
+  local path_relative_to_git_root = utils.escape_parentheses(vim.fn.expand "%:.")
   vim.fn.chdir(cwd) -- restore
   local file_content_cmd = "git -C "
     .. git_root
