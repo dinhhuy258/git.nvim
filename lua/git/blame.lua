@@ -18,7 +18,7 @@ local function blameLinechars()
 end
 
 local function create_blame_win()
-  vim.api.nvim_command "topleft vnew"
+  vim.api.nvim_command "leftabove vnew"
   local win = vim.api.nvim_get_current_win()
   local buf = vim.api.nvim_get_current_buf()
 
