@@ -18,10 +18,11 @@ local default_cfg = {
   keymaps = {
     quit_blame = "q",
     blame_commit = "<CR>",
+    quit_blame_commit = "q",
   },
   target_branch = "master",
   private_gitlabs = {},
-  winbar = false
+  winbar = false,
 }
 
 function M.is_private_gitlab(host)

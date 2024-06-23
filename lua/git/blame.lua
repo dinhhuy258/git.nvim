@@ -146,9 +146,23 @@ local function on_blame_commit_done(commit_hash, lines)
 
   local buf = vim.api.nvim_get_current_buf()
   vim.api.nvim_buf_set_name(buf, commit_hash)
+  vim.api.nvim_buf_set_option(buf, "filetype", "git")
   vim.api.nvim_buf_set_option(buf, "buftype", "nofile")
-  vim.api.nvim_buf_set_option(buf, "bufhidden", "delete")
+  vim.api.nvim_buf_set_option(buf, "bufhidden", "wipe")
+  vim.api.nvim_buf_set_option(buf, "readonly", true)
+
   vim.api.nvim_command "autocmd BufLeave <buffer> lua require('git.blame').blame_commit_quit()"
+  vim.api.nvim_buf_set_keymap(
+    0,
+    "n",
+    config.keymaps.quit_blame_commit,
+    "<CMD>lua require('git.blame').blame_commit_quit()<CR>",
+    {
+      noremap = true,
+      silent = true,
+      expr = false,
+    }
+  )
 
   if vim.fn.search([[^diff .* b/\M]] .. vim.fn.escape(blame_state.relative_path, "\\") .. "$", "W") == 0 then
     vim.fn.search([[^diff .* b/.*]] .. blame_state.file_name .. "$", "W")

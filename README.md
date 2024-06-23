@@ -55,6 +55,8 @@ require('git').setup({
     quit_blame = "q",
     -- Open blame commit
     blame_commit = "<CR>",
+    -- Quit blame commit
+    quit_blame_commit = "q",
     -- Open file/folder in git repository
     browse = "<Leader>go",
     -- Open pull request of the current branch
@@ -84,7 +86,7 @@ require('git').setup({
 
 `:Git` run git command in terminal
 
-Eg: 
+Eg:
 `:Git checkout -b test`
 
 `:GitBlame` opens git blame window
@@ -95,7 +97,7 @@ Eg:
 
 `:GitCreatePullRequest` create pull request in git repository, the default target branch is set in the `target_branch` option. If you provide the branch then the default `target_branch` will be ignored
 
-Eg: 
+Eg:
 `:GitCreatePullRequest`
 `:GitCreatePullRequest test_branch`
 
