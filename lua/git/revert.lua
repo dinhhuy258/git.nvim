@@ -93,22 +93,14 @@ function M.revert()
   local commit_hash = utils.split(line, " ")[1]
   local git_root, _ = git.get_repo_info()
 
-  local revert_cmd = "git -C " .. git_root .. " revert --no-commit " .. commit_hash .. "..HEAD"
+  local revert_cmd = "git -C " .. git_root .. " revert --no-commit " .. commit_hash
   if revert_state.file ~= "" then
-    revert_cmd = "git -C " .. git_root .. " checkout " .. commit_hash .. " -- " .. revert_state.file
+    revert_cmd = "git -C " .. git_root .. " show " .. commit_hash .. " -- " .. revert_state.file .. " | git -C " .. git_root .. " apply -R"
   end
-
-  vim.notify(revert_cmd)
 
   git.run_git_cmd(revert_cmd)
 
   M.close()
-
-  if revert_state.file ~= "" then
-    utils.log("Revert " .. revert_state.file .. " to commit " .. commit_hash)
-  else
-    utils.log("Revert to commit " .. commit_hash)
-  end
 end
 
 return M
