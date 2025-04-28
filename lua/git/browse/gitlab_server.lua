@@ -47,14 +47,14 @@ function Gitlab:open_pull_request()
 
   local merge_request_id = vim.split(merge_request, "/")[3]
 
-  return GitServer._open_url(path.join { self.git_url, self.path, "merge_requests", merge_request_id })
+  return GitServer._open_url(path.join { self.git_url, self.path, "-/merge_requests", merge_request_id })
 end
 
 function Gitlab:create_pull_request(target_branch)
   return GitServer._open_url(path.join {
     self.git_url,
     self.path,
-    "/merge_requests/new?utf8=%E2%9C%93&merge_request[source_branch]="
+    "-/merge_requests/new?utf8=%E2%9C%93&merge_request[source_branch]="
       .. self.branch
       .. "&merge_request[target_branch]="
       .. target_branch,
