@@ -19,9 +19,9 @@ function GitServer._open_url(url)
   if vim.fn.has "win16" == 1 or vim.fn.has "win32" == 1 or vim.fn.has "win64" == 1 then
     vim.fn.system("start cmd /cstart /b " .. url)
   elseif vim.fn.has "mac" == 1 or vim.fn.has "macunix" == 1 or vim.fn.has "gui_macvim" == 1 then
-    vim.fn.system('open "' .. url .. '"')
+    vim.fn.system("open '" .. url .. "'")
   else
-    vim.fn.system('xdg-open "' .. url .. '" &> /dev/null &')
+    vim.fn.system("xdg-open '" .. url .. "'' &> /dev/null &")
   end
 end
 
