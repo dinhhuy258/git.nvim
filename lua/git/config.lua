@@ -20,7 +20,21 @@ local default_cfg = {
     blame_commit = "<CR>",
     quit_blame_commit = "q",
   },
-  target_branch = "master",
+  target_branch = function()
+    -- Dynamically determine the default branch from git remote
+    local handle = io.popen("git remote show origin 2>/dev/null | grep 'HEAD branch' | cut -d' ' -f5")
+    if handle then
+      local result = handle:read("*a")
+      handle:close()
+      -- Trim whitespace and return the branch name
+      local branch = result:match("^%s*(.-)%s*$")
+      if branch and branch ~= "" then
+        return branch
+      end
+    end
+
+    return "master"
+  end,
   private_gitlabs = {},
   winbar = false,
 }

@@ -35,6 +35,10 @@ function M.create_pull_request(target_branch)
   end
 
   local git_target_branch = config.target_branch
+  if type(git_target_branch) == "function" then
+    git_target_branch = git_target_branch()
+  end
+
   if target_branch ~= nil and target_branch ~= "" then
     git_target_branch = target_branch
   end

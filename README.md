@@ -72,8 +72,24 @@ require('git').setup({
     -- Revert the current file to the specific commit
     revert_file = "<Leader>gR",
   },
-  -- Default target branch when create a pull request
-  target_branch = "master",
+  -- Default target branch when creating a pull request
+  -- Can be either:
+  --   - A string (e.g., "master", "main", "develop")
+  --   - A function that returns a string (e.g., function() return "main" end)
+  -- By default, it dynamically detects the default branch from git remote
+  target_branch = function()
+    local handle = io.popen("git remote show origin 2>/dev/null | grep 'HEAD branch' | cut -d' ' -f5")
+    if handle then
+      local result = handle:read("*a")
+      handle:close()
+      local branch = result:match("^%s*(.-)%s*$")
+      if branch and branch ~= "" then
+        return branch
+      end
+    end
+
+    return "master"
+  end,
   -- Private gitlab hosts, if you use a private gitlab, put your private gitlab host here
   private_gitlabs = { "https://xxx.git.com" },
   -- Enable winbar in all windows created by this plugin
