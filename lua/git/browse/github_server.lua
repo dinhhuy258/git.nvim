@@ -47,7 +47,11 @@ function Github:_open_visual_mode(relative_path, start_line, end_line)
 end
 
 function Github:create_pull_request(target_branch)
-  return GitServer._open_url(path.join { self.git_url, self.path, "compare", target_branch .. "..." .. self.branch })
+  local encoded_target = target_branch:gsub("/", "%%2F")
+  local encoded_branch = self.branch:gsub("/", "%%2F")
+  return GitServer._open_url(
+    path.join { self.git_url, self.path, "compare", encoded_target .. "..." .. encoded_branch }
+  )
 end
 
 return Github
